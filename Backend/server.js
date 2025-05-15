@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 
 const userRoute = require("./Routes/Client-routes")
+const expertRoute = require("./Routes/Expert-routes")
 
 require("dotenv").config();
 
@@ -11,7 +12,8 @@ app.use(express.json());
 const PORT = process.env.PORT;
 const MONGO_URI = process.env.MONGO_URI;
 
-
+app.use("/api", userRoute)
+app.use("/api", expertRoute)
 
 mongoose.connect(MONGO_URI)
 .then(() => {
