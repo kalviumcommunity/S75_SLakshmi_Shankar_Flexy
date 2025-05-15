@@ -108,7 +108,7 @@ router.put("/update-account/:id", async(req, res) => {
             })
         }
 
-        await Client.findByIdAndUpdate(userId, newData, {new: true});
+        await Expert.findByIdAndUpdate(userId, newData, {new: true});
         return res.status(200).json({
             message: "Updated the account"
         })
