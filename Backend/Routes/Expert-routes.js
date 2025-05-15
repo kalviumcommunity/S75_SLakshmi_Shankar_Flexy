@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const Expert = require('../Schema/Exprert-schema');
+const auth = require("../middleware/auth")
 require('dotenv').config();
 
 
@@ -66,5 +67,31 @@ router.post('/expert-login', async (req, res) => {
         });
     }
 });
+
+
+// Get all experts
+
+router.get('/all-experts', async(req, res) => {
+    try{
+        const allUsers = await Expert.find();
+
+        if (!allUsers){
+            return res.status(404).json({
+                mess: "No users found"
+            })
+        }
+
+        res.status(200).json({
+            mess: "Data found",
+            users: allUsers
+        })
+    }
+    catch(err){
+        res.status(500).json({
+            mess: "Internal server error",
+            Error: err.message
+        })
+    }
+})
 
 module.exports = router;
