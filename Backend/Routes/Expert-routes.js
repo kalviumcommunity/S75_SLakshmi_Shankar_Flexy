@@ -25,8 +25,17 @@ router.post('/expert-sign-up', async (req, res) => {
             location,
             password: hashedPassword
         });
-
         await expert.save();
+
+        const payload = { id: expert.contact };
+        const token = await jwt.sign(payload, JWT, { expiresIn: '12h' });
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
 
 
         res.status(201).json(expert);
@@ -54,7 +63,17 @@ router.post('/expert-login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, userCheck.password);
         if (!isMatch) {
             return res.status(401).json({ mess: "Incorrect password" });
-        }
+        };
+
+        const payload  = { id: userCheck.contact};
+        const token = jwt.sign(payload, JWT, {expiresIn: '12h'})
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
 
         return res.status(200).json({
             mess: "Login successful",
@@ -71,7 +90,7 @@ router.post('/expert-login', async (req, res) => {
 
 // Get all experts
 
-router.get('/all-experts', async(req, res) => {
+router.get('/all-experts',auth, async(req, res) => {
     try{
         const allUsers = await Expert.find();
 
@@ -96,7 +115,7 @@ router.get('/all-experts', async(req, res) => {
 
 // Update
 
-router.put("/update-account/:id", async(req, res) => {
+router.put("/update-account/:id", auth, async(req, res) => {
     try{
         const userId = req.params.id;
 
