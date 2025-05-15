@@ -4,7 +4,7 @@ require('dotenv').config()
 
 const Auth = (req, res, next) => {
     const token = req.cookies.token;
-    const SECRET_KEY = process.env.JWT;
+    const JWT_SECERT = process.env.JWT_SECRET;
 
     if (!token){
         return res.status(401).json({
@@ -13,7 +13,7 @@ const Auth = (req, res, next) => {
     }
 
     try{
-        const verify = jwt.verify(token, SECRET_KEY);
+        const verify = jwt.verify(token, JWT_SECERT);
         req.user = verify;
         next();
     }

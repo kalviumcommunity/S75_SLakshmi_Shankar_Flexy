@@ -3,8 +3,9 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const Client = require("../Schema/Client-schema");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
-
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Test Routes
 router.post('/test-addClients', async(req, res) => {
@@ -66,6 +67,23 @@ router.post('/client-signup',async(req, res)=>{
         })
         await newClient.save();
 
+        const token = jwt.sign({ id: newClient.phone }, JWT_SECRET, {
+            expiresIn: '7d'
+        });
+
+        res.cookie('token', token, {
+            httpOnly: false,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
+        res.cookie('name',name, {
+            httpOnly: false,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
+
         res.status(201).json({
             mess: "Client registered successfully"
         });
@@ -98,6 +116,23 @@ router.post("/client-login", async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ mess: "Invalid credentials" });
         }
+
+        const token = jwt.sign({ id: client.phone }, JWT_SECRET, {
+            expiresIn: '7d'
+        });
+
+        res.cookie('token', token, {
+            httpOnly: false,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
+        res.cookie('name', client.name, {
+            httpOnly: false,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 12 * 60 * 60 * 1000
+        });
 
         res.status(200).json({ mess: "Login successful" });
     } catch (err) {
@@ -181,7 +216,7 @@ router.post("/get-by-id", auth, async(req, res) => {
 
 // Update
 
-router.put("/update-account/:id", async(req, res) => {
+router.put("/update-account/:id",auth,  async(req, res) => {
     try{
         const userId = req.params.id;
 
