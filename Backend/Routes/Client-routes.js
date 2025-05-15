@@ -178,5 +178,32 @@ router.post("/get-by-id", auth, async(req, res) => {
         })
     }
 });
+
+// Update
+
+router.put("/update-account/:id", async(req, res) => {
+    try{
+        const userId = req.params.id;
+
+        const newData = req.body;
+
+        if(!userId){
+            return res.status(401).json({
+                message: "All fields are required"
+            })
+        }
+
+        await Client.findByIdAndUpdate(userId, newData, {new: true});
+        return res.status(200).json({
+            message: "Updated the account"
+        })
+    }
+    catch(err){
+        return res.status(500).json({
+            message: "Internal server error",
+            Error: err.message
+        })
+    }
+});
   
   module.exports = router;
