@@ -2,29 +2,55 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const Expert = require('../Schema/Exprert-schema');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const auth = require("../middleware/auth")
 require('dotenv').config();
 
 
 // Sign-up
-router.post('/expert-sign-up', async (req, res) => {
-    try {
-        const { name, contact, profession, exp, location, password } = req.body;
-
-        if (!name || !contact || !profession || !exp || !location || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, '../uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
         }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+
+router.post('/expert-sign-up', upload.single('license'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'License file is required' });
+        }
+        const { name, contact, profession, exp, location, password } = req.body;
+        const file = req.file;
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const expert = new Expert({
             name,
             contact,
+            licenseFile: {
+                filename: file.originalname,
+                path: file.path,
+                mimetype: file.mimetype,
+                size: file.size
+            },
             profession,
             exp,
             location,
             password: hashedPassword
         });
+
         await expert.save();
 
         const payload = { id: expert.contact };
@@ -36,7 +62,6 @@ router.post('/expert-sign-up', async (req, res) => {
             sameSite: 'Lax',
             maxAge: 12 * 60 * 60 * 1000
         });
-
 
         res.status(201).json(expert);
     } catch (err) {
