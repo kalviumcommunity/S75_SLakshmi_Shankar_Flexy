@@ -51,18 +51,19 @@ router.post('/expert-login', async (req, res) => {
         const { phone, password } = req.body;
 
         if (!phone || !password) {
-            return res.status(400).json({ mess: "All fields are required" });
+            return res.status(400).json({ message: "All fields are required" });
         }
 
         const userCheck = await Expert.findOne({ contact: phone });
 
         if (!userCheck) {
-            return res.status(409).json({ mess: "User not found" });
+            return res.status(409).json({ message: "User not found" });
         }
 
+        // Password checking
         const isMatch = await bcrypt.compare(password, userCheck.password);
         if (!isMatch) {
-            return res.status(401).json({ mess: "Incorrect password" });
+            return res.status(401).json({ message: "Incorrect password" });
         };
 
         const payload  = { id: userCheck.contact};
