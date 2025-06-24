@@ -138,11 +138,11 @@ const ClientHome = () => {
                         src={
                             expert.licenseFile?.filename
                             ? `https://flexy-backend.onrender.com/uploads/${encodeURIComponent(expert.licenseFile.filename)}`
-                            : 'https://via.placeholder.com/150'
+                            : 'https://dummyimage.com/150x150/cccccc/000000&text=No+Image'
                         }
                         alt={expert.name}
                         className='expert-image'
-                        onError={(e) => (e.target.src = 'https://via.placeholder.com/150')}
+                        onError={(e) => (e.target.src = 'https://dummyimage.com/150x150/cccccc/000000&text=No+Image')}
                     />
 
                     <div className='expert-details'>
