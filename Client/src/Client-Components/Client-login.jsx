@@ -1,0 +1,142 @@
+import React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const ClientLogin = () => {
+
+        const navigate = useNavigate();
+        const [formData, setFormData] = useState({
+            name: '',
+            phone: '',
+            password: ''
+        });
+    
+        const [errors, setErrors] = useState({});
+        const [showPassword, setShowPassword] = useState(false);
+    
+        const handleChange = (e) => {
+            const { name, value } = e.target;
+            setFormData({ ...formData, [name]: value });
+    
+            // Clear error on input change
+            setErrors({ ...errors, [name]: '' });
+        };
+    
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+        
+            const newErrors = {};
+        
+            if (formData.password.length < 6) {
+                newErrors.password = 'Password must be at least 6 characters.';
+            }
+        
+        
+            if (Object.keys(newErrors).length > 0) {
+                setErrors(newErrors);
+                return;
+            }
+            navigate('/client-home')
+        
+            try {
+                const response = await fetch('https://flexy-backend.onrender.com/api/client-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name: formData.name,
+                        phone: formData.phone,
+                        password: formData.password
+                    }),
+                });
+        
+                const data = await response.json();
+                console.log(data)
+        
+                if (response.ok) {
+                    console.log('Success:', data.mess);
+                    
+                    setFormData({
+                        name: '',
+                        phone: '',
+                        password: ''
+                    });
+                } else {
+                    console.error('Error:', data.mess);
+                    // Optionally show error to user
+                    navigate('/client-sign-up')
+                    setErrors({ general: data.mess });
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                setErrors({ general: 'Something went wrong. Please try again.' });
+            }
+        };
+        
+    
+        const togglePasswordVisibility = (field) => {
+            if (field === 'password') {
+                setShowPassword(!showPassword);
+            }
+        };
+    return (
+        <div className="signup-container">
+        <h2 className="signup-title">Sign Up</h2>
+        <form onSubmit={handleSubmit}>
+            <div className="form-left">
+                <input
+                    type="text"
+                    className="input-field"
+                    placeholder="Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                />
+                <input
+                    type="tel"
+                    className="input-field"
+                    placeholder="Phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                />
+                <div className="password-wrapper">
+                    <input
+                        type={showPassword ? 'text' : 'password'}
+                        className="input-field"
+                        placeholder="Password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                    />
+                    <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility('password')}
+                        className="password-toggle"
+                    >
+                        {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                    {errors.password && <span className="error-label">{errors.password}</span>}
+                </div>
+            </div>
+
+            <div className="input-divider"></div>
+
+            <div className="form-right">
+                <button type="submit" className="signup-button">Login</button>
+                <div className="divide">or</div>
+                <p className="existing-account">
+                    Create an account? <a href="/client-sign-up">Sign Up</a>
+                </p>
+            </div>
+        </form>
+    </div>
+    );
+}
+
+export default ClientLogin;

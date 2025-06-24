@@ -1,0 +1,102 @@
+.landing-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.landing-box {
+    background-color: white;
+    width: 80%;
+    max-width: 900px;
+    display: flex;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 40px;
+    gap: 40px;
+}
+
+.left-section {
+    flex: 1;
+    color: #333;
+}
+
+.logo-circle {
+    width: 40px;
+    height: 40px;
+    border: 2px solid black;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.left-section h2 {
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.left-section p {
+    margin: 4px 0;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    color: #555;
+}
+
+.divider {
+    width: 4px;
+    background-color: black;
+}
+
+.right-section {
+    flex: 0.5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.option a {
+    text-decoration: none;
+    color: black;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.underline {
+    height: 4px;
+    width: 100%;
+    background-color: black;
+    margin-top: 4px;
+}
+
+.flexy-logo {
+    
+    width: 79px;
+    height: 118px;
+    left: 250px;
+    top: 251px;
+    background: url('/logo.png') no-repeat center center;
+    background-size: contain;
+}
+
+.clientLogo, .expertLogo{
+    width: 40px;
+    height: 40px;
+}
+
+.clientTitle, .expertTitle{
+    font-size: x-large;
+}
