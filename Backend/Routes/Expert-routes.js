@@ -8,6 +8,9 @@ const fs = require('fs');
 const auth = require("../middleware/auth")
 require('dotenv').config();
 
+const jwt = require('jsonwebtoken');
+const JWT = process.env.JWT_SECRET;
+
 
 // Sign-up
 const storage = multer.diskStorage({
@@ -54,7 +57,7 @@ router.post('/expert-sign-up', upload.single('license'), async (req, res) => {
         await expert.save();
 
         const payload = { id: expert.contact };
-        const token = await jwt.sign(payload, JWT, { expiresIn: '12h' });
+        const token = jwt.sign(payload, JWT, { expiresIn: '12h' });
 
         res.cookie('token', token, {
             httpOnly: true,
