@@ -1,0 +1,124 @@
+/* Container */
+.signup-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    transform: translate(0%, 40%);
+}
+
+.signup-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+form {
+    display: flex;
+    gap: 2rem;
+}
+
+.form-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Input */
+.input-field {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.input-field:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+/* Password toggle button */
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #777;
+    font-size: 13px;
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+/* Vertical divider */
+.input-divider {
+    width: 5px;
+    background-color: #090909;
+}
+
+/* Sign up button */
+.signup-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.signup-button:hover {
+    background-color: #3a7bc8;
+}
+
+.divide {
+    margin: 1rem ;
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+}
+
+/* Login link */
+.existing-account {
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+}
+
+.existing-account a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.existing-account a:hover {
+    text-decoration: underline;
+}
+
+.error-label{
+    color: red;
+    font-size: small;
+    margin-left: 3px;
+}

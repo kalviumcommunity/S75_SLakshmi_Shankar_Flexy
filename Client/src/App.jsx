@@ -1,35 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react';
+import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import './App.css'
+import './index.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import ClientSignUp from './Client-Components/Client-sign-up';
+import LandingPage from './Landing-page';
+import ClientLogin from './Client-Components/Client-login';
+import ClientHome from './Client-Components/Client-home';
+import ExpertSiginUp from './Expert-Components/Expert-sigin-up';
+import ExpertHome from './Expert-Components/Expert-home';
+import ExpertLogin from './Expert-Components/Expert-login';
+import ClientInfo from './Client-Components/Client-Info';
+import Chat from './Client-Components/Chat';
 
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path='/' element={<LandingPage />} />
+        <Route path='/client-sign-up' element={<ClientSignUp />} />
+        <Route path='/client-login' element={<ClientLogin />} />
+        <Route path='/client-home' element={<ClientHome />} />
+        <Route path='/expert/:id' element={<ClientInfo />} />
+        <Route path='/chat/:expertId' element={<Chat />} />
+
+        <Route path='/expert-sign-up' element={<ExpertSiginUp />} />
+        <Route path='/expert-login' element={<ExpertLogin />} />
+        <Route path='/expert-home' element={<ExpertHome />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;

@@ -1,0 +1,239 @@
+/* Container & Layout */
+.expert-signup__container {
+    height: 100vh;
+    background-color: #e6f3fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .expert-signup__card {
+    background: #fff;
+    width: 750px;
+    display: flex;
+    padding: 40px;
+    border-radius: 6px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Form Section */
+  .expert-signup__form-section {
+    flex: 1;
+    padding-right: 20px;
+  }
+  
+  .expert-signup__heading {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 26px;
+    color: #333;
+  }
+  
+  .expert-signup__form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .expert-signup__form-group {
+    margin-bottom: 16px;
+  }
+  
+  .expert-signup__input {
+    width: 350px;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .expert-signup__input-file {
+    font-size: 13px;
+    padding: 5px;
+  }
+  
+  .expert-signup__form-row {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .expert-signup__input.small {
+    width: 80px;
+  }
+  
+  /* Buttons */
+  .expert-signup__button {
+    background-color: #1d79c8;
+    color: #fff;
+    padding: 10px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: fit-content;
+    transition: background-color 0.2s ease;
+  }
+  
+  .expert-signup__button:hover {
+    background-color: #155ea5;
+  }
+  
+  .expert-signup__side-button {
+    width: 100%;
+    margin-bottom: 14px;
+  }
+  
+  /* Divider Section */
+  .expert-signup__divider-section {
+    width: 160px;
+    border-left: 2px solid #000;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* "Or" Divider */
+  .expert-signup__or-divider {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    margin: 10px 0;
+    position: relative;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .expert-signup__or-divider::before,
+  .expert-signup__or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #000;
+    margin: 0 6px;
+  }
+  
+  /* Text Note */
+  .expert-signup__text-muted {
+    font-size: 12px;
+    color: #444;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .expert-signup__error{
+    color: red;
+    font-size: smaller;
+    margin-bottom: -20px;
+    margin-left: 2px;
+  }
+
+
+
+
+
+
+
+
+
+  .expert-login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #e6f3ff;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .expert-login-card {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    display: flex;
+    width: 800px;
+    max-width: 95%;
+    padding: 50px;
+  }
+  
+  .expert-login-left,
+  .expert-login-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .expert-login-left h2 {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .expert-login-left input {
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 300px;
+  }
+  
+  .password-field {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .password-field span {
+    margin-left: -50px;
+    right: 16px;
+    cursor: pointer;
+    color: #7f7f7f;
+    font-weight: 500;
+  }
+  
+  .expert-login-divider {
+    width: 3px;
+    background-color: #000;
+    margin: 0 20px;
+  }
+  
+  .login-btn {
+    padding: 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .login-btn:hover {
+    background-color: #2980b9;
+  }
+  
+  .or {
+    text-align: center;
+    color: #888;
+  }
+  
+  .expert-login-right p {
+    text-align: center;
+    color: #333;
+  }
+  
+  .expert-login-right a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .expert-login-right a:hover {
+    text-decoration: underline;
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  

@@ -1,0 +1,279 @@
+.dataContainer {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.expertData {
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 1300px;
+}
+
+.expertData img{
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 120px;
+    border: 8px solid white;
+    border-top:none;
+    border-right: none;
+    border-left: none;
+}
+
+.userNameDiv {
+    width: 150px;
+}
+
+.logoHeader {
+    margin-left: 30px;
+    width: 15%;
+}
+
+.client-home-container {
+    background-color: #e6f4fd;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 20px;
+}
+
+.home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.home-logo {
+    height: 40px;
+}
+
+.user-name {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.location, .filter {
+    display: flex;
+    align-items: center;
+    background: #73bdee;
+    padding: 6px 10px;
+    border-radius: 10px;
+    gap: 5px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 10px;
+}
+
+.search-icon {
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.experts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.expert-card {
+    background-color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    gap: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.expert-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.expert-details {
+    flex: 1;
+}
+
+.expert-details h4 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.expert-details p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.stars {
+    color: gold;
+    font-size: 14px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.info-btn, .chat-btn {
+    background-color: #73bdee;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.filter:hover{
+    cursor: pointer;
+}
+
+.searchIcon:hover{
+    cursor: pointer;
+    color: #ff0000;
+}
+
+.mainInfo {
+    background-color: #e6f4ff;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.infoBox {
+    background-color: white;
+    width: 900px;
+    padding: 40px;
+    height: fit-content;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+
+.infoBox h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.infoBox img {
+    display: block;
+    margin: 20px auto;
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 3px solid #ddd;
+}
+
+.infoBox p {
+    font-size: 16px;
+    margin: 10px 0;
+    width: fit-content;
+}
+
+.infoBox p strong {
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.hireButton {
+    display: block;
+    margin: 30px auto 0;
+    background-color: orange;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.hireButton:hover {
+    background-color: darkorange;
+}
+
+.carousel { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.carousel img {
+    width: 400px;
+    height: 140px;
+    border-radius: 8px;
+}
+
+.arrow {
+    cursor: pointer;
+    font-size: 24px;
+    user-select: none;
+}
+.arrow:hover{
+    color: #73bdee;
+}
+
+.closeBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.closeBtn:hover {
+    color: #ff0000;
+}
+
+.hr {
+    background-color: rgb(255, 255, 255);
+    height: 10px;
+    border: none;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    margin-left: -20px;
+    margin-right: -20px;
+}
