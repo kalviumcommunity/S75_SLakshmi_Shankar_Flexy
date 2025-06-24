@@ -119,7 +119,7 @@ router.post('/expert-login', async (req, res) => {
 
 // Get all experts
 
-router.get('/all-experts',auth, async(req, res) => {
+router.get('/all-experts', async(req, res) => {
     try{
         const allUsers = await Expert.find();
 

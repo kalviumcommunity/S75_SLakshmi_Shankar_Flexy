@@ -72,13 +72,13 @@ router.post('/client-signup',async(req, res)=>{
         });
 
         res.cookie('token', token, {
-            httpOnly: false,
+            httpOnly: true,
             secure: false,
             sameSite: 'Lax',
             maxAge: 12 * 60 * 60 * 1000
         });
         res.cookie('name',name, {
-            httpOnly: false,
+            httpOnly: true,
             secure: false,
             sameSite: 'Lax',
             maxAge: 12 * 60 * 60 * 1000
@@ -123,13 +123,13 @@ router.post("/client-login", async (req, res) => {
         });
 
         res.cookie('token', token, {
-            httpOnly: false,
+            httpOnly: true,
             secure: false,
             sameSite: 'Lax',
             maxAge: 12 * 60 * 60 * 1000
         });
         res.cookie('name', client.name, {
-            httpOnly: false,
+            httpOnly: true,
             secure: false,
             sameSite: 'Lax',
             maxAge: 12 * 60 * 60 * 1000
