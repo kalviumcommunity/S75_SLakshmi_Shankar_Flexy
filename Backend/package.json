@@ -18,6 +18,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.1",
     "multer": "^2.0.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "socket.io": "^4.8.1"
   }
 }
