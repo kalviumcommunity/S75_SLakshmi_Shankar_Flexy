@@ -1,12 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const cookieParser = require('cookie-parser');
 require("dotenv").config();
 
 const userRoute = require("./Routes/Client-routes");
 const expertRoute = require("./Routes/Expert-routes");
 
 const app = express();
+app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:5173"
