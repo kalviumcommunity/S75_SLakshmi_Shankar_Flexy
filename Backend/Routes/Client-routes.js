@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require("../middleware/auth");
 const Client = require("../Schema/Client-schema");
+const Expert = require("../Schema/Exprert-schema")
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
