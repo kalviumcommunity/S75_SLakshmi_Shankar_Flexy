@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require('path');
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
 require("dotenv").config();
@@ -18,6 +19,7 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(express.json());
 

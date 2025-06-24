@@ -46,7 +46,7 @@ const ClientHome = () => {
 
     const getByLocation = async () => {
         try {
-            const response = await fetch('http://localhost:5000/API/get-by-location', {
+            const response = await fetch('https://flexy-backend.onrender.com/api/get-by-location', {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ location: locationSet }),
@@ -68,7 +68,7 @@ const ClientHome = () => {
 
     const getByName = async () => {
         try {
-            const response = await fetch('http://localhost:5000/API/get-by-profession', {
+            const response = await fetch('https://flexy-backend.onrender.com/api/get-by-profession', {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
@@ -135,10 +135,16 @@ const ClientHome = () => {
             allExperts.map((expert, index) => (
                 <div className='expert-card' key={index}>
                     <img
-                        src={`http://localhost:5000/uploads/${encodeURIComponent(expert.licenseFile.filename)}`}
+                        src={
+                            expert.licenseFile?.filename
+                            ? `https://flexy-backend.onrender.com/uploads/${encodeURIComponent(expert.licenseFile.filename)}`
+                            : 'https://via.placeholder.com/150'
+                        }
                         alt={expert.name}
                         className='expert-image'
+                        onError={(e) => (e.target.src = 'https://via.placeholder.com/150')}
                     />
+
                     <div className='expert-details'>
                         <h4>{expert.name}</h4>
                         <p>{expert.profession}</p>
