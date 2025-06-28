@@ -13,7 +13,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://flexyfrontend.netlify.app/"
+  "https://flexyfrontend.netlify.app"
 ];
 
 app.use(cors({
