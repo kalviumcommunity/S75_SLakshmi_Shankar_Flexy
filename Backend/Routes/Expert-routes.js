@@ -62,7 +62,7 @@ router.post('/expert-sign-up', upload.single('license'), async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: false,
-            sameSite: 'Lax',
+            sameSite: 'None',
             maxAge: 12 * 60 * 60 * 1000
         });
 
@@ -100,7 +100,7 @@ router.post('/expert-login', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: false,
-            sameSite: 'Lax',
+            sameSite: 'None',
             maxAge: 12 * 60 * 60 * 1000
         });
 
