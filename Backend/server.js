@@ -10,6 +10,7 @@ const expertRoute = require("./Routes/Expert-routes");
 
 const app = express();
 app.use(cookieParser());
+app.use(express.json({ limit: "10mb" }));
 
 const allowedOrigins = [
   "http://localhost:5173",

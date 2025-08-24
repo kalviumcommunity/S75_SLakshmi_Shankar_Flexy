@@ -277,3 +277,14 @@
     margin-left: -20px;
     margin-right: -20px;
 }
+
+
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #555;
+}

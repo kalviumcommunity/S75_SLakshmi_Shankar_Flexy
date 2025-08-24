@@ -9,11 +9,9 @@ const expertSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    licenseFile: {
-        filename: { type: String },
-        path: { type: String },
-        mimetype: { type: String },
-        size: { type: Number }
+    license: {
+        data: Buffer,
+        contentType: String
     },
     profession: {
         type: String,
