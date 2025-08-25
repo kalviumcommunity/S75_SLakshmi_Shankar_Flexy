@@ -18,7 +18,7 @@ const ExpertInfoPage = () => {
             });
 
             const data = await response.json();
-            if (response.ok && data.userData) {
+            if (response.ok) {
                 setInfo(data.userData);
                 fetchPexelsImages(data.userData.profession);
             }
