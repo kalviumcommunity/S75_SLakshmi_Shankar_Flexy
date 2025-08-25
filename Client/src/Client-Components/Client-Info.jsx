@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { X,ArrowBigLeft,ArrowBigRight } from 'lucide-react';
-
+import { X, ArrowBigLeft, ArrowBigRight } from 'lucide-react';
 
 const ExpertInfoPage = () => {
     const { id } = useParams();
@@ -18,14 +17,13 @@ const ExpertInfoPage = () => {
                 credentials: 'include'
             });
 
-            if (response.ok) {
-                const data = await response.json();
+            const data = await response.json();
+            if (response.ok && data.userData) {
                 setInfo(data.userData);
                 fetchPexelsImages(data.userData.profession);
-                console.log(data.userData)
             }
         } catch (err) {
-            console.log(err.message);
+            console.log("Error fetching expert info:", err.message);
         }
     };
 
@@ -37,12 +35,13 @@ const ExpertInfoPage = () => {
                 }
             });
             const data = await res.json();
-            setPexelsImages(data.photos);
+            if (data.photos) setPexelsImages(data.photos);
         } catch (error) {
-            console.error("Failed to fetch images", error);
+            console.error("Failed to fetch images:", error);
         }
     };
 
+    // Auto carousel
     useEffect(() => {
         if (pexelsImages.length === 0) return;
         const interval = setInterval(() => {
@@ -55,20 +54,24 @@ const ExpertInfoPage = () => {
         fetchInfo();
     }, [id]);
 
+    // Manual carousel navigation
+    const prevImage = () => {
+        setCurrentIndex(prev => (prev === 0 ? pexelsImages.length - 1 : prev - 1));
+    };
+
+    const nextImage = () => {
+        setCurrentIndex(prev => (prev === pexelsImages.length - 1 ? 0 : prev + 1));
+    };
+
     return (
         <div className='mainInfo'>
             <div className='infoBox'>
                 <X size={20} color='white' strokeWidth={5} className="closeBtn" onClick={() => window.history.back()} />
                 {info ? (
                     <>
-                        <img
-                            src={info.license} // this is now a base64 string
-                            alt={info.name}
-                            className='profileImg'
-                        />
                         <p className='line'><strong>Name:</strong> {info.name}</p>
                         <p className='line'><strong>Work Field:</strong> {info.profession}</p>
-                        <p className='line'><strong>Rating:</strong>★★★★☆</p>
+                        <p className='line'><strong>Rating:</strong> ★★★★☆</p>
                         <p className='line'><strong>Location:</strong> {info.location}</p>
                         <p className='line'><strong>Work Completion:</strong> {info.exp} Years</p>
                         <p className='line'><strong>Phone:</strong> {info.contact}</p>
@@ -80,9 +83,9 @@ const ExpertInfoPage = () => {
 
                         {pexelsImages.length > 0 && (
                             <div className="carousel">
-                                {/* <ArrowBigLeft onClick={nextImage} className='arrow' strokeWidth={1.5} /> */}
-                                <img src={pexelsImages[currentIndex].src.medium} alt="carousel"/>
-                                {/* <ArrowBigRight onClick={prevImage} className='arrow' strokeWidth={1.5} /> */}
+                                <ArrowBigLeft onClick={prevImage} className='arrow' strokeWidth={1.5} />
+                                <img src={pexelsImages[currentIndex].src.medium} alt="carousel" />
+                                <ArrowBigRight onClick={nextImage} className='arrow' strokeWidth={1.5} />
                             </div>
                         )}
                     </>

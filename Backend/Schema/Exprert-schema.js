@@ -9,10 +9,6 @@ const expertSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    license: {
-        data: Buffer,
-        contentType: String
-    },
     profession: {
         type: String,
         required: true

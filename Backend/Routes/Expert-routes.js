@@ -13,20 +13,18 @@ const JWT = process.env.JWT_SECRET;
 
 
 // Sign-up
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+
 
 // Sign-up route
-router.post("/expert-sign-up", upload.single("license"), async (req, res) => {
+router.post("/expert-sign-up", async (req, res) => {
   try {
     const { name, contact, profession, exp, location, password } = req.body;
-    const licenseFile = req.file;
 
-    if (!name || !contact || !profession || !exp || !location || !password || !licenseFile) {
+    if (!name || !contact || !profession || !exp || !location || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const licenseBuffer = licenseFile.buffer; // Store file as Buffer
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const expert = new Expert({
       name,
@@ -34,8 +32,7 @@ router.post("/expert-sign-up", upload.single("license"), async (req, res) => {
       profession,
       exp,
       location,
-      password,
-      license: licenseBuffer,
+      password: hashedPassword
     });
 
     await expert.save();
@@ -55,35 +52,19 @@ router.get('/all-experts', async (req, res) => {
     const allUsers = await Expert.find();
 
     if (!allUsers || allUsers.length === 0) {
-      return res.status(404).json({
-        mess: "No users found"
-      });
+      return res.status(404).json({ mess: "No users found" });
     }
 
-    // Convert buffer → base64 string
-    const usersWithImages = allUsers.map(user => {
-      let licenseBase64 = null;
+    const users = allUsers.map(user => ({
+      _id: user._id,
+      name: user.name,
+      contact: user.contact,
+      profession: user.profession,
+      exp: user.exp,
+      location: user.location
+    }));
 
-      if (user.license) {
-        licenseBase64 = `data:image/png;base64,${user.license.toString("base64")}`;
-        // 🔹 If you stored different image types, you may want to store mimetype in schema
-      }
-
-      return {
-        _id: user._id,
-        name: user.name,
-        contact: user.contact,
-        profession: user.profession,
-        exp: user.exp,
-        location: user.location,
-        license: licenseBase64 || null   // now frontend can directly use in <img />
-      };
-    });
-
-    res.status(200).json({
-      mess: "Data found",
-      users: usersWithImages
-    });
+    res.status(200).json({ mess: "Data found", users });
   } catch (err) {
     res.status(500).json({
       mess: "Internal server error",
