@@ -13,17 +13,20 @@ const JWT = process.env.JWT_SECRET;
 
 
 // Sign-up
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-router.post("/expert-sign-up", async (req, res) => {
+// Sign-up route
+router.post("/expert-sign-up", upload.single("license"), async (req, res) => {
   try {
-    const { name, contact, profession, exp, location, password, license } = req.body;
+    const { name, contact, profession, exp, location, password } = req.body;
+    const licenseFile = req.file;
 
-    if (!name || !contact || !profession || !exp || !location || !password || !license) {
+    if (!name || !contact || !profession || !exp || !location || !password || !licenseFile) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Convert base64 → Buffer
-    const licenseBuffer = Buffer.from(license, "base64");
+    const licenseBuffer = licenseFile.buffer; // Store file as Buffer
 
     const expert = new Expert({
       name,

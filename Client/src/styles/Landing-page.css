@@ -1,53 +1,71 @@
+/* html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; 
+} */
+
+
 .landing-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
+    padding: 20px;
+    overflow: hidden; 
 }
 
 .landing-box {
-    background-color: white;
-    width: 80%;
-    max-width: 900px;
+    background-color: rgb(231, 120, 17);
+    width: 90%;
+    max-width: 1100px;
     display: flex;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 40px;
-    gap: 40px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 50px;
+    gap: 50px;
+    overflow: hidden; 
 }
 
 .left-section {
     flex: 1;
-    color: #333;
+    color: #ffffff;
+    line-height: 1.6;
+    overflow: hidden; 
 }
 
-.logo-circle {
-    width: 40px;
-    height: 40px;
-    border: 2px solid black;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    font-size: 18px;
-}
-
-.left-section h2 {
-    font-weight: 500;
+.left-section h1 {
+    font-size: 2rem;
     margin-bottom: 10px;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.left-section h3 {
+    margin-top: 20px;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
 }
 
 .left-section p {
-    margin: 4px 0;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    color: #555;
+    margin-bottom: 12px;
+    font-size: large;
+}
+
+.left-section ul {
+    margin: 10px 0 20px;
+    padding-left: 20px;
+    font-size: 15px;
+    list-style: none;
+}
+
+.left-section ul li {
+    margin-bottom: 8px;
 }
 
 .divider {
-    width: 4px;
-    background-color: black;
+    width: 3px;
+    background-color: rgba(255, 255, 255, 0.7);
 }
 
 .right-section {
@@ -58,45 +76,114 @@
     gap: 20px;
     font-size: 18px;
     font-weight: 500;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    text-align: center;
+    overflow: hidden; 
+}
+
+.right-section h2 {
+    margin-bottom: 10px;
+    color: #fff;
+    padding-bottom: 20%;
 }
 
 .option {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    transition: transform 0.3s ease-out;
+    overflow: hidden; 
+}
+
+.option:hover {
+    transform: translateX(-10px);
 }
 
 .option a {
     text-decoration: none;
-    color: black;
+    color: #fff;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .underline {
-    height: 4px;
+    height: 3px;
     width: 100%;
-    background-color: black;
+    background-color: rgb(255, 255, 255);
     margin-top: 4px;
 }
 
 .flexy-logo {
-    
-    width: 79px;
-    height: 118px;
-    left: 250px;
-    top: 251px;
-    background: url('/logo.png') no-repeat center center;
-    background-size: contain;
+    width: 90px;
+    height: auto;
+    margin-bottom: 20px;
+    transition: transform 0.5s ease-in-out;
 }
 
-.clientLogo, .expertLogo{
-    width: 40px;
-    height: 40px;
+.flexy-logo:hover {
+    transform: rotate(180deg);
 }
 
-.clientTitle, .expertTitle{
-    font-size: x-large;
+.clientLogo, .expertLogo {
+    width: 38px;
+    height: 38px;
+}
+
+.clientTitle, .expertTitle {
+    font-size: 1.4rem;
+    letter-spacing: 1.2rem;
+    padding-left: 5vh;
+}
+
+
+.offer-container {
+    position: relative;
+    height: 2.5rem; 
+    overflow: hidden;
+}
+
+.offer-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    text-align: left;
+    animation: fadeSlide 12s ease-in-out infinite;
+    overflow: hidden; 
+}
+.offer-text:nth-child(1) {
+    animation-delay: 0s;
+}
+.offer-text:nth-child(2) {
+    animation-delay: 3s;
+}
+.offer-text:nth-child(3) {
+    animation-delay: 6s;
+}
+.offer-text:nth-child(4) {
+    animation-delay: 9s;
+}
+
+@keyframes fadeSlide {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    25% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    35% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }

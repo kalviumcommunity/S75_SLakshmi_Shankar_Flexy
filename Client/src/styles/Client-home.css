@@ -46,8 +46,8 @@
 }
 
 .client-home-container {
-    background-color: #e6f4fd;
-    font-family: 'Segoe UI', sans-serif;
+    background-color: #272727;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;;
     padding: 20px;
 }
 
@@ -59,19 +59,31 @@
 }
 
 .home-logo {
-    height: 40px;
+    height: 8vh;
+    background-color: rgb(231, 120, 17);
 }
 
 .user-name {
     font-weight: bold;
-    font-size: 18px;
+    font-size: 4rem;
+    color: rgb(231, 120, 17);
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: typing 5s steps(90000, end) forwards;
 }
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 63.5% }
+}
+
 
 .search-bar {
     display: flex;
     align-items: center;
     gap: 10px;
-    background-color: white;
+    background-color: rgb(231, 120, 17);
     padding: 10px;
     border-radius: 12px;
     margin: 20px 0;
@@ -80,7 +92,7 @@
 .location, .filter {
     display: flex;
     align-items: center;
-    background: #73bdee;
+    background: rgb(231, 120, 17);
     padding: 6px 10px;
     border-radius: 10px;
     gap: 5px;
@@ -100,18 +112,27 @@
 
 .experts-list {
     display: flex;
-    flex-direction: column;
+    flex: 1;
+    flex-direction: row;
     gap: 20px;
 }
 
 .expert-card {
-    background-color: white;
+    background-color: rgb(231, 120, 17);
     border-radius: 12px;
     display: flex;
     align-items: center;
     padding: 15px;
     gap: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 100vh;
+    transition: transform 0.3s ease-in;
+    box-Shadow: 4px 4px rgba(0, 0, 0, 0.9) 
+}
+
+.expert-card:hover {
+    transform: translateY(-6px);
+
 }
 
 .expert-image {
@@ -128,12 +149,13 @@
 .expert-details h4 {
     margin: 0;
     font-size: 18px;
+    color: rgb(0, 0, 0);
 }
 
 .expert-details p {
     margin: 4px 0;
     font-size: 14px;
-    color: #666;
+    color: #000000;
 }
 
 .stars {
@@ -147,13 +169,32 @@
     gap: 10px;
 }
 
-.info-btn, .chat-btn {
-    background-color: #73bdee;
+.info-btn {
+    background-color: #000000;
     border: none;
     padding: 6px 14px;
     border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
+    color: white;
+    transition: letter-spacing 0.5s ease-in-out;
+}
+.chat-btn {
+    background-color: #000000;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: letter-spacing 0.5s ease-in-out;
+}
+
+.info-btn:hover {
+    letter-spacing: 10px;
+}
+.chat-btn:hover {
+    letter-spacing: 10px;
 }
 
 .filter:hover{
@@ -166,7 +207,7 @@
 }
 
 .mainInfo {
-    background-color: #e6f4ff;
+    background-color: #272727;
     min-height: 80vh;
     display: flex;
     justify-content: center;
@@ -175,7 +216,7 @@
 }
 
 .infoBox {
-    background-color: white;
+    background-color: rgb(231, 120, 17);
     width: 900px;
     padding: 40px;
     height: fit-content;
@@ -199,35 +240,38 @@
     height: 250px;
     object-fit: cover;
     border-radius: 10px;
-    border: 3px solid #ddd;
+    border: 3px solid rgb(231, 120, 17);
 }
 
 .infoBox p {
     font-size: 16px;
     margin: 10px 0;
     width: fit-content;
+    color: white;
 }
 
 .infoBox p strong {
-    font-weight: 500;
+    font-weight: bolder;
+    font-size: larger;
     margin-right: 8px;
 }
 
 .hireButton {
     display: block;
     margin: 30px auto 0;
-    background-color: orange;
+    background-color: #272727;
     color: white;
+    font-weight: bolder;
     padding: 10px 25px;
     border: none;
     border-radius: 20px;
     font-size: 16px;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: letter-spacing 0.3s ease;
 }
 
 .hireButton:hover {
-    background-color: darkorange;
+    letter-spacing: 2px;
 }
 
 .carousel { 
@@ -269,11 +313,11 @@
 }
 
 .hr {
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(231, 120, 17);
     height: 10px;
     border: none;
     border-radius: 3px;
-    margin-bottom: 10px;
+    margin-bottom: 25px;
     margin-left: -20px;
     margin-right: -20px;
 }

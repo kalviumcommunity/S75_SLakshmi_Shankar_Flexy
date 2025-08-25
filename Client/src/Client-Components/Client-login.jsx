@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { X } from 'lucide-react';
 
 const ClientLogin = () => {
 
@@ -57,12 +58,16 @@ const ClientLogin = () => {
         
                 if (response.ok) {
                     console.log('Success:', data.mess);
+
+                    localStorage.setItem('userName', formData.name)
                     
                     setFormData({
                         name: '',
                         phone: '',
                         password: ''
                     });
+
+
                 } else {
                     console.error('Error:', data.mess);
                     // Optionally show error to user
@@ -83,7 +88,7 @@ const ClientLogin = () => {
         };
     return (
         <div className="signup-container">
-        <h2 className="signup-title">Sign Up</h2>
+        <h2 className="signup-title">Sign Up<Link to={'/'}><X style={{ color: "white"}}/></Link></h2>
         <form onSubmit={handleSubmit}>
             <div className="form-left">
                 <input

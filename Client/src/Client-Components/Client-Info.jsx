@@ -42,14 +42,6 @@ const ExpertInfoPage = () => {
         }
     };
 
-    const prevImage = () => {
-        setCurrentIndex(prev => (prev === 0 ? pexelsImages.length - 1 : prev - 1));
-    };
-
-    const nextImage = () => {
-        setCurrentIndex(prev => (prev === pexelsImages.length - 1 ? 0 : prev + 1));
-    };
-
     useEffect(() => {
         if (pexelsImages.length === 0) return;
         const interval = setInterval(() => {
@@ -65,7 +57,7 @@ const ExpertInfoPage = () => {
     return (
         <div className='mainInfo'>
             <div className='infoBox'>
-                <X size={20} className="closeBtn" onClick={() => window.history.back()} />
+                <X size={20} color='white' strokeWidth={5} className="closeBtn" onClick={() => window.history.back()} />
                 {info ? (
                     <>
                         <img
@@ -81,15 +73,15 @@ const ExpertInfoPage = () => {
                         <p className='line'><strong>Phone:</strong> {info.contact}</p>
                         <button className='hireButton'>Hire Now</button>
 
-                        <div style={{ margin: "30px 0" }} />
+                        <div style={{ margin: "30px 0", color: "#272727" }} />
                         
                         <hr />
 
                         {pexelsImages.length > 0 && (
                             <div className="carousel">
-                                <ArrowBigLeft onClick={nextImage} className='arrow' strokeWidth={1.5} />
-                                <img src={pexelsImages[currentIndex].src.medium} alt="carousel" />
-                                <ArrowBigRight onClick={prevImage} className='arrow' strokeWidth={1.5} />
+                                {/* <ArrowBigLeft onClick={nextImage} className='arrow' strokeWidth={1.5} /> */}
+                                <img src={pexelsImages[currentIndex].src.medium} alt="carousel" style={{ width: '800vh'}}/>
+                                {/* <ArrowBigRight onClick={prevImage} className='arrow' strokeWidth={1.5} /> */}
                             </div>
                         )}
                     </>

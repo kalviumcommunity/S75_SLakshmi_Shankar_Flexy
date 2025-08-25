@@ -1,14 +1,14 @@
 /* Container & Layout */
 .expert-signup__container {
     height: 100vh;
-    background-color: #e6f3fc;
+    background-color: #272727;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   
   .expert-signup__card {
-    background: #fff;
+    background: rgb(231, 120, 17);
     width: 750px;
     display: flex;
     padding: 40px;
@@ -62,19 +62,20 @@
   
   /* Buttons */
   .expert-signup__button {
-    background-color: #1d79c8;
+    background-color: #272727;
     color: #fff;
     padding: 10px 16px;
     font-size: 14px;
+    font-weight: bolder;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     width: fit-content;
-    transition: background-color 0.2s ease;
+    transition: letter-spacing 0.2s ease;
   }
   
   .expert-signup__button:hover {
-    background-color: #155ea5;
+    letter-spacing: 2px;
   }
   
   .expert-signup__side-button {
@@ -142,7 +143,7 @@
     align-items: center;
     height: 100vh;
     background-color: #e6f3ff;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;;
   }
   
   .expert-login-card {

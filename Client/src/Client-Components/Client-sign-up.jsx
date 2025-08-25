@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { X } from 'lucide-react';
 import '../styles/Client-signup.css';
 
 const SignUp = () => {
@@ -90,7 +91,7 @@ const SignUp = () => {
 
     return (
         <div className="signup-container">
-            <h2 className="signup-title">Sign Up</h2>
+            <h2 className="signup-title">Sign Up<Link to={'/'}><X style={{ color: "white"}}/></Link></h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-left">
                     <input

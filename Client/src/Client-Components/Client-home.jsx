@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Cookie from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Client-home.css';
-import Logo from '../assests/homeLogo.png';
+import Logo from '../assests/logo.png';
+import Loader from './Loader';
 import { Filter, Search, MapPinned, X } from 'lucide-react';
 
 const ClientHome = () => {
@@ -41,7 +42,9 @@ const ClientHome = () => {
         } catch (err) {
             console.log(err.message);
         } finally {
-            setLoading(false); // stop loader
+            setTimeout(() => {
+                setLoading(false);
+        }, 5000);
         }
     };
 
@@ -105,14 +108,15 @@ const ClientHome = () => {
 
     useEffect(() => {
         getExperts();
-        setUserName(Cookie.get('name'));
+        setUserName(Cookie.get('name') || localStorage.getItem('userName'));
+        console.log(userName);
     }, []);
 
     return (
         <div className='client-home-container'>
             <div className='home-header'>
                 <img src={Logo} alt='Flexy' className='home-logo' />
-                <div className='user-name'>{userName}</div>
+                <div className='user-name'>Welcome, {userName}!</div>
             </div>
 
             <div className='search-bar'>
@@ -131,9 +135,10 @@ const ClientHome = () => {
             <hr className='hr' />
 
             <div className='experts-list'>
-                {loading ? ( // 👈 Loader
+                {loading ? ( 
                     <div className="loader">
-                        <p>Loading experts...</p>
+                        {/* <p>Loading experts...</p> */}
+                        <Loader />
                     </div>
                 ) : error.length !== 0 ? (
                     <div className='no-data-message'>
@@ -142,18 +147,6 @@ const ClientHome = () => {
                 ) : (
                     allExperts.map((expert, index) => (
                         <div className='expert-card' key={index}>
-                            <img
-                                src={
-                                    expert.license
-                                        ? expert.license // already a base64 string like data:image/png;base64,...
-                                        : 'https://dummyimage.com/150x150/cccccc/000000&text=No+Image'
-                                }
-                                alt={expert.name}
-                                className='expert-image'
-                                onError={(e) => (e.target.src = 'https://dummyimage.com/150x150/cccccc/000000&text=No+Image')}
-                            />
-
-
                             <div className='expert-details'>
                                 <h4>{expert.name}</h4>
                                 <p>{expert.profession}</p>

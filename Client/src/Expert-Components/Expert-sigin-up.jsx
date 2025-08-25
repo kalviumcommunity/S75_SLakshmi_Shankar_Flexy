@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Expert-signup.css';
+import { X } from 'lucide-react';
 
 const ExpertSignUp = () => {
   const [step, setStep] = useState(true);
@@ -49,49 +50,43 @@ const ExpertSignUp = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = async() => {
-    try {
-      if (step === true && validateStep1()) {
-        setStep(false);
-      } else if (step === false && validateStep2()) {
-        const data = new FormData();
-  
-        data.append('name', formData.name);
-        data.append('contact', formData.contact);
-        data.append('license', formData.license);
-        data.append('profession', formData.profession);
-        data.append('exp', formData.experience);
-        data.append('location', formData.location);
-        data.append('password', formData.password);
-  
-        console.log(data);
-  
-        const response = await fetch('https://flexy-backend.onrender.com/api/expert-sign-up', {
-          method: "POST",
-          body: data,
-        });
-  
-        // Use only response.json() to parse the body
-        const result = await response.json();
-        console.log(result);
-  
-        // Check for response status to ensure successful response
-        if (response.ok) {
-          navigate('/Expert-home');
-        } else {
-          console.error('Error:', result);
-        }
+  const handleNext = async () => {
+  try {
+    if (step && validateStep1()) {
+      setStep(false);
+    } else if (!step && validateStep2()) {
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('contact', formData.contact);
+      data.append('profession', formData.profession);
+      data.append('exp', formData.experience);
+      data.append('location', formData.location);
+      data.append('password', formData.password);
+      data.append('license', formData.license); // file directly
+
+      const response = await fetch('https://flexy-backend.onrender.com/api/expert-sign-up', {
+        method: 'POST',
+        body: data, // multipart/form-data handled automatically
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        navigate('/Expert-home');
+      } else {
+        console.error('Error:', result);
       }
-    } catch (err) {
-      console.log(err.message);
     }
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div className="expert-signup__container">
       <div className="expert-signup__card">
         <div className="expert-signup__form-section">
-          <h2 className="expert-signup__heading">Sign Up</h2>
+          <h2 className="signup-title">Sign Up<Link to={'/'}><X style={{ color: "white"}}/></Link></h2>
           <form className="expert-signup__form" onSubmit={(e) => e.preventDefault()}>
             {step === true ? (
               <>
@@ -203,7 +198,7 @@ const ExpertSignUp = () => {
           </button>
           <div className="expert-signup__or-divider">or</div>
           <a className="expert-signup__text-muted" href='/expert-login'>
-            Already have an<br />account?
+            Already have an<br /><p>account?</p>
           </a>
         </div>
       </div>
