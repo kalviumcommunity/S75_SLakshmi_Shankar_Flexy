@@ -22,6 +22,7 @@ const ExpertInfoPage = () => {
                 const data = await response.json();
                 setInfo(data.userData);
                 fetchPexelsImages(data.userData.profession);
+                console.log(data.userData)
             }
         } catch (err) {
             console.log(err.message);
@@ -61,7 +62,7 @@ const ExpertInfoPage = () => {
                 {info ? (
                     <>
                         <img
-                            src={`https://flexy-backend.onrender.com/uploads/${encodeURIComponent(info.licenseFile.filename)}`}
+                            src={info.license} // this is now a base64 string
                             alt={info.name}
                             className='profileImg'
                         />
@@ -80,7 +81,7 @@ const ExpertInfoPage = () => {
                         {pexelsImages.length > 0 && (
                             <div className="carousel">
                                 {/* <ArrowBigLeft onClick={nextImage} className='arrow' strokeWidth={1.5} /> */}
-                                <img src={pexelsImages[currentIndex].src.medium} alt="carousel" style={{ width: '800vh'}}/>
+                                <img src={pexelsImages[currentIndex].src.medium} alt="carousel"/>
                                 {/* <ArrowBigRight onClick={prevImage} className='arrow' strokeWidth={1.5} /> */}
                             </div>
                         )}

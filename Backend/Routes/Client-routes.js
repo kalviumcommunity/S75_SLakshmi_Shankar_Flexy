@@ -196,25 +196,36 @@ router.post("/get-by-profession", auth, async(req, res) => {
 
 // Find by id
 
-router.post("/get-by-id", auth, async(req, res) => {
-    try{
-        const _id = req.body;
-        const userData = await Expert.findOne({ _id });
-        if(!userData){
-            return res.status(404).json({
-                message: "No data found"
-            })
-        }
+router.post("/get-by-id", auth, async (req, res) => {
+  try {
+    const { _id } = req.body; // ✅ destructure _id correctly
+    const userData = await Expert.findOne({ _id });
 
-        return res.status(200).json({
-            userData: userData
-        })
-    }catch(err){
-        res.status(500).json({
-            error: err.message
-        })
+    if (!userData) {
+      return res.status(404).json({
+        message: "No data found",
+      });
     }
+
+    // ✅ Convert license buffer to base64 if it exists
+    let licenseBase64 = null;
+    if (userData.license) {
+      licenseBase64 = `data:image/png;base64,${userData.license.toString("base64")}`;
+    }
+
+    return res.status(200).json({
+      userData: {
+        ...userData._doc, // spread other fields
+        license: licenseBase64, // replace buffer with base64 string
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
 });
+
 
 // Update
 

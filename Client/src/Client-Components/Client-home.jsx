@@ -40,7 +40,7 @@ const ClientHome = () => {
                 setError(data);
             }
         } catch (err) {
-            console.log(err.message);
+            console.log(err);
         } finally {
             setTimeout(() => {
                 setLoading(false);
