@@ -205,20 +205,12 @@ router.post("/get-by-id", auth, async (req, res) => {
       return res.status(404).json({ message: "No data found" });
     }
 
-    // Convert license Buffer to base64
-    let licenseBase64 = null;
-    if (userData.license) {
-      licenseBase64 = `data:image/png;base64,${userData.license.toString("base64")}`;
-    }
-
-    return res.status(200).json({
-      ...userData._doc, // spread all fields
-      license: licenseBase64, // replace buffer with base64
-    });
+    return res.status(200).json(userData);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 
