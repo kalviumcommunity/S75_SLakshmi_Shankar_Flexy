@@ -7,6 +7,7 @@ require("dotenv").config();
 
 const userRoute = require("./Routes/Client-routes");
 const expertRoute = require("./Routes/Expert-routes");
+const chatRoute = require("./Routes/Chat-routes");
 
 const app = express();
 app.use(cookieParser());
@@ -23,10 +24,9 @@ app.use(cors({
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.use(express.json());
-
 app.use("/api", userRoute);
 app.use("/api", expertRoute);
+app.use("/api", chatRoute);
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require("../middleware/auth");
 const Client = require("../Schema/Client-schema");
-const Expert = require("../Schema/Exprert-schema")
+const Expert = require("../Schema/Expert-schema")
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
@@ -47,7 +47,7 @@ router.post('/client-signup',async(req, res)=>{
 
     if (!name || !phone || !password){
         return res.status(400).json({
-            mess: "All fields are required"
+            message: "All fields are required"
         })
     }
 
@@ -55,7 +55,7 @@ router.post('/client-signup',async(req, res)=>{
         const checkUser = await Client.findOne({ phone });
         if (checkUser){
             return res.status(409).json({
-                mess: "Client already exists"
+                message: "Client already exists"
             })
         }
 
@@ -86,12 +86,12 @@ router.post('/client-signup',async(req, res)=>{
         });
 
         res.status(201).json({
-            mess: "Client registered successfully"
+            message: "Client registered successfully"
         });
     }
     catch(err){
         res.status(500).json({
-            mess: "Internal server error",
+            message: "Internal server error",
             error: err.message
         })
     }
@@ -116,7 +116,7 @@ router.post("/client-login", async (req, res) => {
         // Password checking
         const isMatch = await bcrypt.compare(password, client.password);
         if (!isMatch) {
-            return res.status(401).json({ mess: "Invalid credentials" });
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
         const token = jwt.sign({ id: client.phone }, JWT_SECRET, {
@@ -136,10 +136,10 @@ router.post("/client-login", async (req, res) => {
             maxAge: 12 * 60 * 60 * 1000
         });
 
-        res.status(200).json({ mess: "Login successful" });
+        res.status(200).json({ message: "Login successful" });
     } catch (err) {
         res.status(500).json({
-            mess: "Internal server error",
+            message: "Internal server error",
             error: err.message
         });
     }
@@ -196,7 +196,7 @@ router.post("/get-by-profession", auth, async(req, res) => {
 
 // Find by id
 
-router.post("/get-by-id", async (req, res) => {
+router.post("/get-by-id", auth, async (req, res) => {
   try {
     const { _id } = req.body;
     const userData = await Expert.findById({ _id });
@@ -236,7 +236,7 @@ router.put("/update-account/:id",auth,  async(req, res) => {
     catch(err){
         return res.status(500).json({
             message: "Internal server error",
-            Error: err.message
+            error: err.message
         })
     }
 });

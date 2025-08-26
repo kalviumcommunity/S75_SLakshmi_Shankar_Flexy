@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const Expert = require('../Schema/Exprert-schema');
+const Expert = require('../Schema/Expert-schema');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -12,8 +12,48 @@ const jwt = require('jsonwebtoken');
 const JWT = process.env.JWT_SECRET;
 
 
-// Sign-up
+// Expert Login
+router.post("/expert-login", async (req, res) => {
+  try {
+    const { contact, password } = req.body;
 
+    if (!contact || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const expert = await Expert.findOne({ contact });
+    if (!expert) {
+      return res.status(404).json({ message: "Expert not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, expert.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: expert.contact }, JWT, {
+      expiresIn: "12h"
+    });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+      maxAge: 12 * 60 * 60 * 1000
+    });
+
+    res.cookie('name', expert.name, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+      maxAge: 12 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({ message: "Login successful" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
 
 // Sign-up route
 router.post("/expert-sign-up", async (req, res) => {
@@ -22,6 +62,12 @@ router.post("/expert-sign-up", async (req, res) => {
 
     if (!name || !contact || !profession || !exp || !location || !password) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check if expert already exists
+    const existingExpert = await Expert.findOne({ contact });
+    if (existingExpert) {
+      return res.status(409).json({ message: "Expert already exists with this contact" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,22 +83,33 @@ router.post("/expert-sign-up", async (req, res) => {
 
     await expert.save();
 
+    const token = jwt.sign({ id: expert.contact }, JWT, {
+      expiresIn: "12h"
+    });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+      maxAge: 12 * 60 * 60 * 1000
+    });
+
     res.status(201).json({ message: "Expert registered successfully", expertId: expert._id });
   } catch (err) {
     console.error("Error in expert-sign-up:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
 
-// Get all experts
+// Get all experts (should be protected)
+router.get('/all-experts', auth, async (req, res) => {
 
-router.get('/all-experts', async (req, res) => {
   try {
     const allUsers = await Expert.find();
 
     if (!allUsers || allUsers.length === 0) {
-      return res.status(404).json({ mess: "No users found" });
+      return res.status(404).json({ message: "No users found" });
     }
 
     const users = allUsers.map(user => ({
@@ -64,11 +121,11 @@ router.get('/all-experts', async (req, res) => {
       location: user.location
     }));
 
-    res.status(200).json({ mess: "Data found", users });
+    res.status(200).json({ message: "Data found", users });
   } catch (err) {
     res.status(500).json({
-      mess: "Internal server error",
-      Error: err.message
+      message: "Internal server error",
+      error: err.message
     });
   }
 });
@@ -96,7 +153,7 @@ router.put("/update-account/:id", auth, async(req, res) => {
     catch(err){
         return res.status(500).json({
             message: "Internal server error",
-            Error: err.message
+            error: err.message
         })
     }
 });
