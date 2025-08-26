@@ -3,12 +3,21 @@ require('dotenv').config()
 
 
 const Auth = (req, res, next) => {
-    const token = req.cookies.token;
+    // Try to get token from cookies first, then from Authorization header
+    let token = req.cookies.token;
+    
+    if (!token && req.headers.authorization) {
+        const authHeader = req.headers.authorization;
+        if (authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);
+        }
+    }
+    
     const JWT_SECRET = process.env.JWT_SECRET;
 
     if (!token){
         return res.status(401).json({
-            message: "User has no token"
+            message: "Access denied. No token provided."
         })
     }
 
@@ -19,7 +28,7 @@ const Auth = (req, res, next) => {
     }
     catch(err){
         res.status(403).json({
-            message: "Invalid token",
+            message: "Invalid or expired token",
             error: err.message 
         })
     }

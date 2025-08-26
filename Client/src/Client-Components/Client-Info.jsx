@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { X, ArrowBigLeft, ArrowBigRight } from 'lucide-react';
-import Profile from "../assests/profile.png"
+import Profile from "../assests/profile.png";
+import { authenticatedFetch } from '../utils/auth';
 
 const ExpertInfoPage = () => {
     const { id } = useParams();
@@ -11,11 +12,9 @@ const ExpertInfoPage = () => {
 
     const fetchInfo = async () => {
         try {
-            const response = await fetch('https://flexy-backend.onrender.com/api/get-by-id', {
+            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/get-by-id', {
                 method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ _id: id }),
-                credentials: 'include'
+                body: JSON.stringify({ _id: id })
             });
 
             const data = await response.json();

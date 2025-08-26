@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/Expert-signup.css';
 import { useNavigate } from 'react-router-dom';
+import { tokenManager } from '../utils/auth';
 
 const ExpertLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +30,11 @@ const ExpertLogin = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        credentials: 'include',
+        body: JSON.stringify({
+          contact: formData.phone,
+          password: formData.password
+        })
       });
 
       const data = await response.json();
@@ -37,30 +42,33 @@ const ExpertLogin = () => {
       if (response.ok) {
         console.log("Login Successful:", data);
 
+        // Extract token from response if provided
+        if (data.token) {
+          tokenManager.setToken(data.token);
+        }
+
         setFormData({
           phone: '',
           password: ''
         });
 
-        navigate('/expert-home')
-
+        navigate('/expert-home');
 
       } else {
-        console.warn("Login Error:", data.mess);
-        if (data.mess === 'All fields are required'){
+        console.warn("Login Error:", data.message);
+        const errorMessage = data.message || 'Login failed';
+        
+        if (errorMessage === 'All fields are required'){
             setShowError(false)
-        }
-        if (data.mess === 'User not found'){
+        } else {
             setShowError(true)
-            setError("User not found")
-        }
-        if (data.mess === 'Incorrect password'){
-            setShowError(true)
-            setError("Incorrect password")
+            setError(errorMessage)
         }
       }
     } catch (err) {
       console.error("Error:", err.message);
+      setShowError(true);
+      setError('Something went wrong. Please try again.');
     }
   };
 

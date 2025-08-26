@@ -5,6 +5,7 @@ import '../styles/Client-home.css';
 import Logo from '../assests/logo.png';
 import Loader from './Loader';
 import { Filter, Search, MapPinned, X } from 'lucide-react';
+import { authenticatedFetch } from '../utils/auth';
 
 const ClientHome = () => {
     const [allExperts, setAllExperts] = useState([]);
@@ -23,10 +24,8 @@ const ClientHome = () => {
     const getExperts = async () => {
         try {
             setLoading(true); // start loader
-            const response = await fetch('https://flexy-backend.onrender.com/api/all-experts', {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-                credentials: 'include'
+            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/all-experts', {
+                method: "GET"
             });
 
             if (response.ok) {
@@ -51,11 +50,9 @@ const ClientHome = () => {
     const getByLocation = async () => {
         try {
             setLoading(true);
-            const response = await fetch('https://flexy-backend.onrender.com/api/get-by-location', {
+            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/get-by-location', {
                 method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ location: locationSet }),
-                credentials: 'include'
+                body: JSON.stringify({ location: locationSet })
             });
 
             if (response.ok) {
@@ -76,11 +73,9 @@ const ClientHome = () => {
     const getByName = async () => {
         try {
             setLoading(true);
-            const response = await fetch('https://flexy-backend.onrender.com/api/get-by-profession', {
+            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/get-by-profession', {
                 method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ profession: searchSet }),
-                credentials: 'include'
+                body: JSON.stringify({ profession: searchSet })
             });
 
             if (response.ok) {

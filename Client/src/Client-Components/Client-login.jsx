@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { X } from 'lucide-react';
+import { tokenManager } from '../utils/auth';
 
 const ClientLogin = () => {
 
@@ -32,12 +33,10 @@ const ClientLogin = () => {
                 newErrors.password = 'Password must be at least 6 characters.';
             }
         
-        
             if (Object.keys(newErrors).length > 0) {
                 setErrors(newErrors);
                 return;
             }
-            navigate('/client-home')
         
             try {
                 const response = await fetch('https://flexy-backend.onrender.com/api/client-login', {
@@ -57,9 +56,15 @@ const ClientLogin = () => {
                 console.log(data)
         
                 if (response.ok) {
-                    console.log('Success:', data.mess);
+                    console.log('Success:', data.message);
 
-                    localStorage.setItem('userName', formData.name)
+                    // Store user name and token if provided
+                    localStorage.setItem('userName', formData.name);
+                    
+                    // Extract token from response if provided
+                    if (data.token) {
+                        tokenManager.setToken(data.token);
+                    }
                     
                     setFormData({
                         name: '',
@@ -67,12 +72,12 @@ const ClientLogin = () => {
                         password: ''
                     });
 
+                    // Navigate only after successful login
+                    navigate('/client-home');
 
                 } else {
-                    console.error('Error:', data.mess);
-                    // Optionally show error to user
-                    navigate('/client-sign-up')
-                    setErrors({ general: data.mess });
+                    console.error('Error:', data.message);
+                    setErrors({ general: data.message || 'Login failed' });
                 }
             } catch (err) {
                 console.error('Error:', err);
