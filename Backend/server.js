@@ -12,15 +12,28 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 
+const cors = require("cors");
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://flexyfrontend.netlify.app"
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function(origin, callback) {
+    // allow requests with no origin (like Postman)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(express.json());
