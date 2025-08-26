@@ -4,12 +4,11 @@ import '../styles/Expert-signup.css';
 import { X } from 'lucide-react';
 
 const ExpertSignUp = () => {
-  const [step, setStep] = useState(true);
+  const [step, setStep] = useState(true); // true = Step 1, false = Step 2
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
-    license: null,
     profession: '',
     experience: '',
     location: '',
@@ -20,10 +19,10 @@ const ExpertSignUp = () => {
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value,
+      [name]: value,
     }));
   };
 
@@ -31,7 +30,6 @@ const ExpertSignUp = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.contact.trim()) newErrors.contact = 'Contact is required';
-    if (!formData.license) newErrors.license = 'Work license is required';
     if (!formData.profession.trim()) newErrors.profession = 'Profession is required';
     if (!formData.experience.trim()) newErrors.experience = 'Experience is required';
 
@@ -43,38 +41,51 @@ const ExpertSignUp = () => {
     const newErrors = {};
     if (!formData.location.trim()) newErrors.location = 'Location is required';
     if (!formData.password) newErrors.password = 'Password is required';
-    if (formData.password !== formData.confirmPassword)
+    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+    else if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = 'Passwords do not match';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = async () => {
+const handleNext = async () => {
   try {
-    if (step && validateStep1()) {
-      setStep(false);
-    } else if (!step && validateStep2()) {
-      const data = new FormData();
-      data.append('name', formData.name);
-      data.append('contact', formData.contact);
-      data.append('profession', formData.profession);
-      data.append('exp', formData.experience);
-      data.append('location', formData.location);
-      data.append('password', formData.password);
-      data.append('license', formData.license); // file directly
+    if (step) {
+      // Step 1 validation
+      if (validateStep1()) {
+        setStep(false);
+      }
+    } else {
+      // Step 2 validation + submit
+      if (validateStep2()) {
+        const payload = {
+          name: formData.name,
+          contact: formData.contact,
+          profession: formData.profession,
+          exp: formData.experience,
+          location: formData.location,
+          password: formData.password,
+        };
 
-      const response = await fetch('https://flexy-backend.onrender.com/api/expert-sign-up', {
-        method: 'POST',
-        body: data, // multipart/form-data handled automatically
-      });
+        const response = await fetch(
+          'https://flexy-backend.onrender.com/api/expert-sign-up',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }
+        );
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (response.ok) {
-        navigate('/Expert-home');
-      } else {
-        console.error('Error:', result);
+        if (response.ok) {
+          console.log(result);
+          localStorage.setItem('expertId', result.expertId);
+          navigate('/Expert-home');
+        } else {
+          console.error('Error:', result);
+        }
       }
     }
   } catch (err) {
@@ -82,13 +93,19 @@ const ExpertSignUp = () => {
   }
 };
 
+
   return (
     <div className="expert-signup__container">
       <div className="expert-signup__card">
         <div className="expert-signup__form-section">
-          <h2 className="signup-title">Sign Up<Link to={'/'}><X style={{ color: "white"}}/></Link></h2>
+          <h2 className="signup-title">
+            Sign Up
+            <Link to={'/'}>
+              <X style={{ color: 'white' }} />
+            </Link>
+          </h2>
           <form className="expert-signup__form" onSubmit={(e) => e.preventDefault()}>
-            {step === true ? (
+            {step ? (
               <>
                 <div className="expert-signup__form-group">
                   <input
@@ -112,16 +129,6 @@ const ExpertSignUp = () => {
                     onChange={handleChange}
                   />
                   {errors.contact && <p className="expert-signup__error">{errors.contact}</p>}
-                </div>
-
-                <div className="expert-signup__form-group">
-                  <input
-                    type="file"
-                    name="license"
-                    className="expert-signup__input-file"
-                    onChange={handleChange}
-                  />
-                  {errors.license && <p className="expert-signup__error">{errors.license}</p>}
                 </div>
 
                 <div className="expert-signup__form-row">
@@ -194,11 +201,12 @@ const ExpertSignUp = () => {
 
         <div className="expert-signup__divider-section">
           <button className="expert-signup__button expert-signup__side-button" onClick={handleNext}>
-            {step === true ? 'Next' : 'Sign Up'}
+            {step ? 'Next' : 'Sign Up'}
           </button>
           <div className="expert-signup__or-divider">or</div>
-          <a className="expert-signup__text-muted" href='/expert-login'>
-            Already have an<br /><p>account?</p>
+          <a className="expert-signup__text-muted" href="/expert-login">
+            Already have an<br />
+            <p>account?</p>
           </a>
         </div>
       </div>

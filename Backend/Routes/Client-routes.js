@@ -196,7 +196,7 @@ router.post("/get-by-profession", auth, async(req, res) => {
 
 // Find by id
 
-router.post("/get-by-id", auth, async (req, res) => {
+router.post("/get-by-id", async (req, res) => {
   try {
     const { _id } = req.body;
     const userData = await Expert.findById({ _id });

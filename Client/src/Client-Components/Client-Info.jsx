@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { X, ArrowBigLeft, ArrowBigRight } from 'lucide-react';
+import Profile from "../assests/profile.png"
 
 const ExpertInfoPage = () => {
     const { id } = useParams();
@@ -19,8 +20,8 @@ const ExpertInfoPage = () => {
 
             const data = await response.json();
             if (response.ok) {
-                setInfo(data.userData);
-                fetchPexelsImages(data.userData.profession);
+                setInfo(data);
+                fetchPexelsImages(data.profession);
             }
         } catch (err) {
             console.log("Error fetching expert info:", err.message);
@@ -46,7 +47,7 @@ const ExpertInfoPage = () => {
         if (pexelsImages.length === 0) return;
         const interval = setInterval(() => {
             setCurrentIndex(prev => (prev === pexelsImages.length - 1 ? 0 : prev + 1));
-        }, 3000);
+        }, 5000);
         return () => clearInterval(interval);
     }, [pexelsImages]);
 
@@ -69,11 +70,12 @@ const ExpertInfoPage = () => {
                 <X size={20} color='white' strokeWidth={5} className="closeBtn" onClick={() => window.history.back()} />
                 {info ? (
                     <>
+                        <img src={Profile} alt="Profile Picture" />
                         <p className='line'><strong>Name:</strong> {info.name}</p>
                         <p className='line'><strong>Work Field:</strong> {info.profession}</p>
                         <p className='line'><strong>Rating:</strong> ★★★★☆</p>
                         <p className='line'><strong>Location:</strong> {info.location}</p>
-                        <p className='line'><strong>Work Completion:</strong> {info.exp} Years</p>
+                        <p className='line'><strong>Experience:</strong> {info.exp} Years</p>
                         <p className='line'><strong>Phone:</strong> {info.contact}</p>
                         <button className='hireButton'>Hire Now</button>
 
@@ -83,11 +85,24 @@ const ExpertInfoPage = () => {
 
                         {pexelsImages.length > 0 && (
                             <div className="carousel">
-                                <ArrowBigLeft onClick={prevImage} className='arrow' strokeWidth={1.5} />
-                                <img src={pexelsImages[currentIndex].src.medium} alt="carousel" />
-                                <ArrowBigRight onClick={nextImage} className='arrow' strokeWidth={1.5} />
+                                <img 
+                                    src={pexelsImages[(currentIndex - 1 + pexelsImages.length) % pexelsImages.length].src.medium} 
+                                    alt="previous" 
+                                    className="side-image"
+                                />
+                                <img 
+                                    src={pexelsImages[currentIndex].src.medium} 
+                                    alt="current" 
+                                    className="main-image"
+                                />
+                                <img 
+                                    src={pexelsImages[(currentIndex + 1) % pexelsImages.length].src.medium} 
+                                    alt="next" 
+                                    className="side-image"
+                                />
                             </div>
                         )}
+
                     </>
                 ) : (
                     <p>Loading...</p>
