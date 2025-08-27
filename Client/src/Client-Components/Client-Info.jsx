@@ -9,6 +9,9 @@ const ExpertInfoPage = () => {
     const [info, setInfo] = useState(null);
     const [pexelsImages, setPexelsImages] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isHiring, setIsHiring] = useState(false);
+    const [hireMessage, setHireMessage] = useState('');
+    const [showHireModal, setShowHireModal] = useState(false);
 
     const fetchInfo = async () => {
         try {
@@ -63,6 +66,45 @@ const ExpertInfoPage = () => {
         setCurrentIndex(prev => (prev === pexelsImages.length - 1 ? 0 : prev + 1));
     };
 
+    const handleHireClick = () => {
+        setShowHireModal(true);
+    };
+
+    const handleHireSubmit = async () => {
+        if (isHiring) return;
+        
+        setIsHiring(true);
+        try {
+            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/create-booking', {
+                method: 'POST',
+                body: JSON.stringify({
+                    expertId: id,
+                    message: hireMessage
+                })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                alert('Booking request sent successfully! The expert will review your request.');
+                setShowHireModal(false);
+                setHireMessage('');
+            } else {
+                alert(data.message || 'Failed to send booking request');
+            }
+        } catch (error) {
+            console.error('Error sending booking request:', error);
+            alert('Failed to send booking request. Please try again.');
+        } finally {
+            setIsHiring(false);
+        }
+    };
+
+    const closeHireModal = () => {
+        setShowHireModal(false);
+        setHireMessage('');
+    };
+
     return (
         <div className='mainInfo'>
             <div className='infoBox'>
@@ -76,7 +118,7 @@ const ExpertInfoPage = () => {
                         <p className='line'><strong>Location:</strong> {info.location}</p>
                         <p className='line'><strong>Experience:</strong> {info.exp} Years</p>
                         <p className='line'><strong>Phone:</strong> {info.contact}</p>
-                        <button className='hireButton'>Hire Now</button>
+                        <button className='hireButton' onClick={handleHireClick}>Hire Now</button>
 
                         <div style={{ margin: "30px 0", color: "#272727" }} />
                         
@@ -107,6 +149,64 @@ const ExpertInfoPage = () => {
                     <p>Loading...</p>
                 )}
             </div>
+
+            {/* Hire Modal */}
+            {showHireModal && (
+                <div className="modal-overlay" onClick={closeHireModal}>
+                    <div className="hire-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Hire {info?.name}</h3>
+                            <X size={20} onClick={closeHireModal} style={{ cursor: 'pointer' }} />
+                        </div>
+                        <div className="modal-body">
+                            <p>Send a message to {info?.name} about your requirements:</p>
+                            <textarea
+                                value={hireMessage}
+                                onChange={(e) => setHireMessage(e.target.value)}
+                                placeholder="Describe your project requirements, timeline, and any specific details..."
+                                rows={4}
+                                style={{
+                                    width: '100%',
+                                    padding: '10px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '5px',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                onClick={closeHireModal}
+                                style={{
+                                    padding: '10px 20px',
+                                    marginRight: '10px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '5px',
+                                    backgroundColor: '#f5f5f5',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleHireSubmit}
+                                disabled={isHiring}
+                                style={{
+                                    padding: '10px 20px',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    backgroundColor: isHiring ? '#ccc' : '#007bff',
+                                    color: 'white',
+                                    cursor: isHiring ? 'not-allowed' : 'pointer'
+                                }}
+                            >
+                                {isHiring ? 'Sending...' : 'Send Request'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
