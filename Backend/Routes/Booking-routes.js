@@ -90,18 +90,20 @@ router.get('/expert-bookings', Auth, async (req, res) => {
     try {
         const expertContact = req.user.id;
 
-        console.log('Expert bookings request - Contact from JWT:', expertContact);
-
-        // Find expert by contact field (since JWT uses contact as id)
-        const expert = await Expert.findOne({ contact: expertContact });
-        
-        console.log('Found expert:', expert ? expert._id : 'Not found');
+        // Find expert by contact field (JWT uses contact as id)
+        // Try both string and number formats to handle data type mismatches
+        const expert = await Expert.findOne({ 
+            $or: [
+                { contact: expertContact },
+                { contact: expertContact.toString() },
+                { contact: parseInt(expertContact) }
+            ]
+        });
         
         if (!expert) {
             return res.status(404).json({ 
                 message: 'Expert not found',
-                searchedContact: expertContact,
-                debug: 'JWT contact does not match any expert in database'
+                searchedContact: expertContact
             });
         }
 
@@ -109,13 +111,11 @@ router.get('/expert-bookings', Auth, async (req, res) => {
             .sort({ createdAt: -1 })
             .populate('clientId', 'name phone');
 
-        console.log('Found bookings count:', bookings.length);
-
         res.status(200).json({ bookings });
 
     } catch (error) {
         console.error('Error fetching expert bookings:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
@@ -146,8 +146,14 @@ router.patch('/update-booking-status', Auth, async (req, res) => {
             return res.status(400).json({ message: 'Invalid status. Must be "accepted" or "declined"' });
         }
 
-        // Find expert by contact field
-        const expert = await Expert.findOne({ contact: expertContact });
+        // Find expert by contact field - handle data type mismatches
+        const expert = await Expert.findOne({ 
+            $or: [
+                { contact: expertContact },
+                { contact: expertContact.toString() },
+                { contact: parseInt(expertContact) }
+            ]
+        });
         
         if (!expert) {
             return res.status(404).json({ message: 'Expert not found' });
