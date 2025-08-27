@@ -72,7 +72,13 @@ const ExpertHome = () => {
               : booking
           )
         );
-        alert(`Booking ${status} successfully!`);
+        await fetchBookings(); // Refresh bookings after successful action
+        alert(`Booking ${status}ed successfully!`);
+        
+        // Notify other components that booking status changed
+        window.dispatchEvent(new CustomEvent('bookingStatusChanged', { 
+          detail: { bookingId, status } 
+        }));
       } else {
         alert(data.message || `Failed to ${status} booking`);
       }
@@ -89,6 +95,17 @@ const ExpertHome = () => {
     getUser();
     fetchBookings();
     console.log(localStorage.getItem('expertId'))
+
+    // Listen for new booking events to refresh automatically
+    const handleBookingCreated = () => {
+      fetchBookings();
+    };
+
+    window.addEventListener('bookingCreated', handleBookingCreated);
+
+    return () => {
+      window.removeEventListener('bookingCreated', handleBookingCreated);
+    };
   }, [])
 
   return (

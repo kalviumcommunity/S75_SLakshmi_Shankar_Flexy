@@ -89,6 +89,11 @@ const ExpertInfoPage = () => {
                 alert('Booking request sent successfully! The expert will review your request.');
                 setShowHireModal(false);
                 setHireMessage('');
+                
+                // Trigger a custom event to notify expert dashboard to refresh
+                window.dispatchEvent(new CustomEvent('bookingCreated', { 
+                    detail: { expertId: id, booking: data.booking } 
+                }));
             } else {
                 alert(data.message || 'Failed to send booking request');
             }
