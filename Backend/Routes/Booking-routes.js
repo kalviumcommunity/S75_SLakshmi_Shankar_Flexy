@@ -11,6 +11,16 @@ router.post('/create-booking', Auth, async (req, res) => {
         const { expertId, message } = req.body;
         const clientId = req.user.id;
 
+        console.log('Booking request data:', { expertId, message, clientId, userObj: req.user });
+
+        if (!clientId) {
+            return res.status(400).json({ message: 'Client ID not found in token' });
+        }
+
+        if (!expertId) {
+            return res.status(400).json({ message: 'Expert ID is required' });
+        }
+
         // Get client and expert details
         const client = await Client.findById(clientId);
         const expert = await Expert.findById(expertId);
@@ -53,7 +63,12 @@ router.post('/create-booking', Auth, async (req, res) => {
 
     } catch (error) {
         console.error('Error creating booking:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ 
+            message: 'Internal server error',
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
