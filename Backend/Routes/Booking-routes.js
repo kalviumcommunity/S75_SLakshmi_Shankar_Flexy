@@ -33,16 +33,8 @@ router.post('/create-booking', Auth, async (req, res) => {
             return res.status(404).json({ message: 'Expert not found' });
         }
 
-        // Check if there's already a pending booking
-        const existingBooking = await Booking.findOne({
-            clientId: client._id,
-            expertId,
-            status: 'pending'
-        });
-
-        if (existingBooking) {
-            return res.status(400).json({ message: 'You already have a pending booking request with this expert' });
-        }
+        // Allow multiple bookings - remove duplicate prevention
+        // Clients can send multiple requests to the same expert if needed
 
         const newBooking = new Booking({
             clientId: client._id,
