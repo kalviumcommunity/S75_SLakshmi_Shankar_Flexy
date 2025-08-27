@@ -40,7 +40,6 @@ const ExpertHome = () => {
     <div className="expert-home">
       {/* Profile Section */}
       <div className="profile-card">
-        {/* <img src={expert.image} alt="profile" className="profile-img" /> */}
         <div className="profile-details">
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Contact:</strong> {user.contact}</p>
@@ -58,16 +57,6 @@ const ExpertHome = () => {
         </div>
       </div>
 
-      {/* Carousel Section */}
-      {/* <div className="carousel-container">
-        <button className="arrow left" onClick={prevSlide}>←</button>
-        <img
-          src={images[currentIndex]}
-          alt="work"
-          className="carousel-img"
-        />
-        <button className="arrow right" onClick={nextSlide}>→</button>
-      </div> */}
     </div>
   );
 };

@@ -116,9 +116,7 @@
 
 .experts-list {
     display: flex;
-    flex: 1;
-    flex-direction: row;
-
+    flex-wrap: wrap;
     gap: 20px;
 }
 
@@ -126,13 +124,13 @@
     background-color: rgb(231, 120, 17);
     border-radius: 12px;
     display: flex;
+    flex: 0 0 calc(20% - 20px);
     align-items: center;
     padding: 15px;
     gap: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 100vh;
     transition: transform 0.3s ease-in;
-    box-Shadow: 4px 4px rgba(0, 0, 0, 0.9) 
+    box-Shadow: 4px 4px rgba(0, 0, 0, 0.9);
+    box-sizing: border-box;
 }
 
 .expert-card:hover {

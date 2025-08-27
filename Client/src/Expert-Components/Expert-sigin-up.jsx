@@ -101,7 +101,7 @@ const handleNext = async () => {
           <h2 className="signup-title">
             Sign Up
             <Link to={'/'}>
-              <X style={{ color: 'white' }} />
+              <X style={{ color: '#FF7A00' }} />
             </Link>
           </h2>
           <form className="expert-signup__form" onSubmit={(e) => e.preventDefault()}>
@@ -206,7 +206,7 @@ const handleNext = async () => {
           <div className="expert-signup__or-divider">or</div>
           <a className="expert-signup__text-muted" href="/expert-login">
             Already have an<br />
-            <p>account?</p>
+            <p className='link'>account?</p>
           </a>
         </div>
       </div>
