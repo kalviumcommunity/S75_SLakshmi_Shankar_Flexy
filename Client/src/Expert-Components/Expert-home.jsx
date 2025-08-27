@@ -1,11 +1,13 @@
 // ExpertHome.jsx
 import React, { useEffect, useState } from "react";
 import "../styles/ExpertsHome.css";
+import { authenticatedFetch } from '../utils/auth';
 
 const ExpertHome = () => {
-
-
   const [user, setUser] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [processingBooking, setProcessingBooking] = useState(null);
 
   const getUser = async () => {
     try {
@@ -30,9 +32,62 @@ const ExpertHome = () => {
     }
   };
 
+  const fetchBookings = async () => {
+    try {
+      const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/expert-bookings');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setBookings(data.bookings);
+      } else {
+        console.error('Failed to fetch bookings:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBookingAction = async (bookingId, status) => {
+    if (processingBooking === bookingId) return;
+    
+    setProcessingBooking(bookingId);
+    try {
+      const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/update-booking-status', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          bookingId,
+          status
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setBookings(prevBookings =>
+          prevBookings.map(booking =>
+            booking._id === bookingId
+              ? { ...booking, status, updatedAt: new Date().toISOString() }
+              : booking
+          )
+        );
+        alert(`Booking ${status} successfully!`);
+      } else {
+        alert(data.message || `Failed to ${status} booking`);
+      }
+    } catch (error) {
+      console.error(`Error ${status}ing booking:`, error);
+      alert(`Failed to ${status} booking. Please try again.`);
+    } finally {
+      setProcessingBooking(null);
+    }
+  };
+
 
   useEffect(() => {
     getUser();
+    fetchBookings();
     console.log(localStorage.getItem('expertId'))
   }, [])
 
@@ -47,13 +102,39 @@ const ExpertHome = () => {
         </div>
 
         <div className="booking-card">
-          <h4>Booking</h4>
-          <p><strong>Name:</strong> name</p>
-          <p><strong>Location:</strong> location</p>
-          <div className="buttons">
-            <button className="accept">Accept</button>
-            <button className="decline">Decline</button>
-          </div>
+          <h4>Booking Requests</h4>
+          {loading ? (
+            <p>Loading bookings...</p>
+          ) : bookings.length === 0 ? (
+            <p>No booking requests yet.</p>
+          ) : (
+            bookings.filter(booking => booking.status === 'pending').map((booking) => (
+              <div key={booking._id} style={{ marginBottom: '15px', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}>
+                <p><strong>Client:</strong> {booking.clientName}</p>
+                <p><strong>Phone:</strong> {booking.clientPhone}</p>
+                {booking.message && (
+                  <p><strong>Message:</strong> "{booking.message}"</p>
+                )}
+                <p><strong>Date:</strong> {new Date(booking.createdAt).toLocaleDateString()}</p>
+                <div className="buttons">
+                  <button 
+                    className="accept"
+                    onClick={() => handleBookingAction(booking._id, 'accepted')}
+                    disabled={processingBooking === booking._id}
+                  >
+                    {processingBooking === booking._id ? 'Processing...' : 'Accept'}
+                  </button>
+                  <button 
+                    className="decline"
+                    onClick={() => handleBookingAction(booking._id, 'declined')}
+                    disabled={processingBooking === booking._id}
+                  >
+                    {processingBooking === booking._id ? 'Processing...' : 'Decline'}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
