@@ -90,22 +90,32 @@ router.get('/expert-bookings', Auth, async (req, res) => {
     try {
         const expertContact = req.user.id;
 
+        console.log('Expert bookings request - Contact from JWT:', expertContact);
+
         // Find expert by contact field (since JWT uses contact as id)
         const expert = await Expert.findOne({ contact: expertContact });
         
+        console.log('Found expert:', expert ? expert._id : 'Not found');
+        
         if (!expert) {
-            return res.status(404).json({ message: 'Expert not found' });
+            return res.status(404).json({ 
+                message: 'Expert not found',
+                searchedContact: expertContact,
+                debug: 'JWT contact does not match any expert in database'
+            });
         }
 
         const bookings = await Booking.find({ expertId: expert._id })
             .sort({ createdAt: -1 })
             .populate('clientId', 'name phone');
 
+        console.log('Found bookings count:', bookings.length);
+
         res.status(200).json({ bookings });
 
     } catch (error) {
         console.error('Error fetching expert bookings:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 });
 
