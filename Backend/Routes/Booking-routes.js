@@ -57,6 +57,19 @@ router.post('/create-booking', Auth, async (req, res) => {
     }
 });
 
+router.get('/testforbooking', async(req, res) => {
+    try {
+        const allData = await Booking.find();
+        return res.status(200).json({
+            DATA: allData
+        })
+    } catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+})
+
 // Get all bookings for an expert
 router.get('/expert-bookings', Auth, async (req, res) => {
     try {
