@@ -9,20 +9,20 @@ const Auth = require('../middleware/auth');
 router.post('/create-booking', Auth, async (req, res) => {
     try {
         const { expertId, message } = req.body;
-        const clientId = req.user.id;
+        const userIdentifier = req.user.id;
 
-        console.log('Booking request data:', { expertId, message, clientId, userObj: req.user });
+        console.log('Booking request data:', { expertId, message, userIdentifier, userObj: req.user });
 
-        if (!clientId) {
-            return res.status(400).json({ message: 'Client ID not found in token' });
+        if (!userIdentifier) {
+            return res.status(400).json({ message: 'User ID not found in token' });
         }
 
         if (!expertId) {
             return res.status(400).json({ message: 'Expert ID is required' });
         }
 
-        // Get client and expert details
-        const client = await Client.findById(clientId);
+        // Get client and expert details - find by phone for client, _id for expert
+        const client = await Client.findOne({ phone: userIdentifier });
         const expert = await Expert.findById(expertId);
 
         if (!client) {
@@ -35,7 +35,7 @@ router.post('/create-booking', Auth, async (req, res) => {
 
         // Check if there's already a pending booking
         const existingBooking = await Booking.findOne({
-            clientId,
+            clientId: client._id,
             expertId,
             status: 'pending'
         });
@@ -45,7 +45,7 @@ router.post('/create-booking', Auth, async (req, res) => {
         }
 
         const newBooking = new Booking({
-            clientId,
+            clientId: client._id,
             expertId,
             clientName: client.name,
             clientPhone: client.phone.toString(),
@@ -88,9 +88,16 @@ router.get('/testforbooking', async(req, res) => {
 // Get all bookings for an expert
 router.get('/expert-bookings', Auth, async (req, res) => {
     try {
-        const expertId = req.user.id;
+        const expertContact = req.user.id;
 
-        const bookings = await Booking.find({ expertId })
+        // Find expert by contact field (since JWT uses contact as id)
+        const expert = await Expert.findOne({ contact: expertContact });
+        
+        if (!expert) {
+            return res.status(404).json({ message: 'Expert not found' });
+        }
+
+        const bookings = await Booking.find({ expertId: expert._id })
             .sort({ createdAt: -1 })
             .populate('clientId', 'name phone');
 
@@ -123,13 +130,20 @@ router.get('/client-bookings', Auth, async (req, res) => {
 router.patch('/update-booking-status', Auth, async (req, res) => {
     try {
         const { bookingId, status } = req.body;
-        const expertId = req.user.id;
+        const expertContact = req.user.id;
 
         if (!['accepted', 'declined'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status. Must be "accepted" or "declined"' });
         }
 
-        const booking = await Booking.findOne({ _id: bookingId, expertId });
+        // Find expert by contact field
+        const expert = await Expert.findOne({ contact: expertContact });
+        
+        if (!expert) {
+            return res.status(404).json({ message: 'Expert not found' });
+        }
+
+        const booking = await Booking.findOne({ _id: bookingId, expertId: expert._id });
 
         if (!booking) {
             return res.status(404).json({ message: 'Booking not found or you are not authorized to update this booking' });
