@@ -17,6 +17,7 @@ app.use(express.json({ limit: "10mb" }));
 const allowedOrigins = [
   "http://localhost:5174",
   "https://flexyfrontend.netlify.app",
+  "https://flexy-life.netlify.app",
   "http://localhost:5173"
 ];
 

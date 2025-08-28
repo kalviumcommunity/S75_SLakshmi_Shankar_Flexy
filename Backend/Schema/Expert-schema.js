@@ -14,7 +14,7 @@ const expertSchema = new mongoose.Schema({
         required: true
     },
     exp: {
-        type: Number,
+        type: String,
         required: true
     },
     location: {

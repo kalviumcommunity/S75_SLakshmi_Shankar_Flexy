@@ -114,9 +114,19 @@ router.get('/expert-bookings', Auth, async (req, res) => {
 // Get all bookings for a client
 router.get('/client-bookings', Auth, async (req, res) => {
     try {
-        const clientId = req.user.id;
+        const clientPhone = req.user.id;
 
-        const bookings = await Booking.find({ clientId })
+        // Find client by phone number (JWT uses phone as id)
+        const client = await Client.findOne({ phone: clientPhone });
+        
+        if (!client) {
+            return res.status(404).json({ 
+                message: 'Client not found',
+                searchedPhone: clientPhone
+            });
+        }
+
+        const bookings = await Booking.find({ clientId: client._id })
             .sort({ createdAt: -1 })
             .populate('expertId', 'name profession contact location');
 
