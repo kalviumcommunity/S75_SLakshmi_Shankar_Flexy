@@ -199,7 +199,12 @@ router.post("/get-by-profession", auth, async(req, res) => {
 router.post("/get-by-id", auth, async (req, res) => {
   try {
     const { _id } = req.body;
-    const userData = await Expert.findById({ _id });
+    
+    if (!_id) {
+      return res.status(400).json({ message: "Expert ID is required" });
+    }
+
+    const userData = await Expert.findById(_id);
 
     if (!userData) {
       return res.status(404).json({ message: "No data found" });
@@ -207,6 +212,7 @@ router.post("/get-by-id", auth, async (req, res) => {
 
     return res.status(200).json(userData);
   } catch (err) {
+    console.error('Error in get-by-id:', err);
     res.status(500).json({ error: err.message });
   }
 });
