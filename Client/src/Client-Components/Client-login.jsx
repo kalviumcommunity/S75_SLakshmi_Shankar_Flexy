@@ -15,6 +15,7 @@ const ClientLogin = () => {
     
         const [errors, setErrors] = useState({});
         const [showPassword, setShowPassword] = useState(false);
+        const [loginState, setLoginState] = useState("Login");
     
         const handleChange = (e) => {
             const { name, value } = e.target;
@@ -26,11 +27,13 @@ const ClientLogin = () => {
     
         const handleSubmit = async (e) => {
             e.preventDefault();
+            setLoginState("Loading...");
         
             const newErrors = {};
         
             if (formData.password.length < 6) {
                 newErrors.password = 'Password must be at least 6 characters.';
+                setLoginState("Login");
             }
         
             if (Object.keys(newErrors).length > 0) {
@@ -138,7 +141,7 @@ const ClientLogin = () => {
             <div className="input-divider"></div>
 
             <div className="form-right">
-                <button type="submit" className="signup-button">Login</button>
+                <button type="submit" className="signup-button">{loginState}</button>
                 <div className="divide">or</div>
                 <p className="existing-account">
                     Create an account? <a href="/client-sign-up">Sign Up</a>
