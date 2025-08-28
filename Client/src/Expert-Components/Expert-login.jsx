@@ -37,6 +37,8 @@ const ExpertLogin = () => {
         })
       });
 
+      localStorage.setItem("expertId", formData.contact)
+
       const data = await response.json();
 
       if (response.ok) {
