@@ -116,15 +116,13 @@ const ClientHome = () => {
 
             <div className='search-bar'>
                 <div className='location'>
-                    <MapPinned size={20} strokeWidth={1.5} />
+                    <MapPinned size={20} strokeWidth={1.5}  color='white'onClick={getByLocation}/>
                     <input type="text" placeholder="Location" value={locationSet} onChange={(e) => setLocation(e.target.value)} />
                 </div>
-                <div className='filter' onClick={getByLocation}>
-                    <Filter size={16} strokeWidth={1.5} />
-                </div>
+                
                 <input type="text" placeholder="Search by profession" className='search-input' value={searchSet} onChange={(e) => setSearch(e.target.value)} />
-                <X size={20} strokeWidth={1.5} onClick={getExperts} className='searchIcon'/>
-                <Search size={20} strokeWidth={1.5} className='searchIcon' onClick={getByName} />
+                <X size={20} strokeWidth={1.5} onClick={getExperts} className='searchIcon' color='white'/>
+                <Search size={20} strokeWidth={1.5} className='searchIcon' onClick={getByName}  color='white'/>
             </div>
 
             <hr className='hr' />
