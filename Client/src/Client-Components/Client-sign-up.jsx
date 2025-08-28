@@ -16,6 +16,7 @@ const SignUp = () => {
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [siginState, setSign] = useState("Sign Up");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -27,15 +28,18 @@ const SignUp = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSign("Loading...")
     
         const newErrors = {};
     
         if (formData.password.length < 6) {
             newErrors.password = 'Password must be at least 6 characters.';
+            setSign("Sign Up");
         }
     
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match.';
+            setSign("Sign Up");
         }
     
         if (Object.keys(newErrors).length > 0) {

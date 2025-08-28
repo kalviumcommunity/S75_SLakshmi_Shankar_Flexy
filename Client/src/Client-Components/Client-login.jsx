@@ -81,6 +81,7 @@ const ClientLogin = () => {
                 } else {
                     console.error('Error:', data.message);
                     setErrors({ general: data.message || 'Login failed' });
+                    setLoginState("Login");
                 }
             } catch (err) {
                 console.error('Error:', err);
