@@ -95,7 +95,7 @@ const SignUp = () => {
 
     return (
         <div className="signup-container">
-            <h2 className="signup-title">Sign Up<Link to={'/'}><X style={{ color: "white"}}/></Link></h2>
+            <h2 className="signup-title">Sign Up<Link to={'/'}><X style={{ color: "#FF7A00"}}/></Link></h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-left">
                     <input
