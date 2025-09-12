@@ -196,7 +196,7 @@ router.post("/get-by-profession", auth, async(req, res) => {
 
 // Find by id
 
-router.post("/get-by-id", auth, async (req, res) => {
+router.post("/get-by-id", async (req, res) => {
   try {
     const { _id } = req.body;
     
@@ -216,9 +216,6 @@ router.post("/get-by-id", auth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
-
 
 // Update
 
