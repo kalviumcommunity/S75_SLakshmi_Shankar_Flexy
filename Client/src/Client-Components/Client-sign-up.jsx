@@ -46,7 +46,7 @@ const SignUp = () => {
             setErrors(newErrors);
             return;
         }
-        navigate('/client-login')
+        navigate('/client-login');
     
         try {
             const response = await fetch('https://flexy-backend.onrender.com/api/client-signup', {
