@@ -131,6 +131,39 @@ router.get('/all-experts', auth, async (req, res) => {
 });
 
 
+// Get expert by ID
+router.post("/get-by-id", async (req, res) => {
+  try {
+    const { _id } = req.body;
+
+    if (!_id) {
+      return res.status(400).json({ message: "Expert ID is required" });
+    }
+
+    const expert = await Expert.findById(_id);
+    if (!expert) {
+      return res.status(404).json({ message: "Expert not found" });
+    }
+
+    // Return expert data without password
+    const expertData = {
+      _id: expert._id,
+      name: expert.name,
+      contact: expert.contact,
+      profession: expert.profession,
+      exp: expert.exp,
+      location: expert.location
+    };
+
+    res.status(200).json(expertData);
+  } catch (err) {
+    res.status(500).json({
+      message: "Internal server error",
+      error: err.message
+    });
+  }
+});
+
 // Update
 
 router.put("/update-account/:id", auth, async(req, res) => {
