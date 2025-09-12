@@ -69,13 +69,12 @@
     color: rgb(231, 120, 17);
     overflow: hidden;
     white-space: nowrap;
-    width: 0;
     animation: typing 5s steps(90000, end) forwards;
 }
 
 @keyframes typing {
     from { width: 0 }
-    to { width: 63.5% }
+    to { width: 69.5% }
 }
 
 .line {
