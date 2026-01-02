@@ -1,32 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { X, ArrowBigLeft, ArrowBigRight } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { X, Star, MapPin, Phone, Briefcase, Calendar, AlertCircle } from 'lucide-react';
 import Profile from "../assests/profile.png";
 import { authenticatedFetch } from '../utils/auth';
 
 const ExpertInfoPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [info, setInfo] = useState(null);
     const [pexelsImages, setPexelsImages] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHiring, setIsHiring] = useState(false);
     const [hireMessage, setHireMessage] = useState('');
     const [showHireModal, setShowHireModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const fetchInfo = async () => {
         try {
+            setLoading(true);
+            setError(null);
+
             const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/get-by-id', {
                 method: 'POST',
                 body: JSON.stringify({ _id: id })
             });
 
             const data = await response.json();
+            
             if (response.ok) {
                 setInfo(data);
                 fetchPexelsImages(data.profession);
+            } else {
+                setError(data.message || 'Failed to load expert information');
             }
         } catch (err) {
-            console.log("Error fetching expert info:", err.message);
+            console.error("Error fetching expert info:", err);
+            setError('Network error. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -38,9 +50,12 @@ const ExpertInfoPage = () => {
                 }
             });
             const data = await res.json();
-            if (data.photos) setPexelsImages(data.photos);
+            if (data.photos && data.photos.length > 0) {
+                setPexelsImages(data.photos);
+            }
         } catch (error) {
             console.error("Failed to fetch images:", error);
+            // Non-critical error, continue without images
         }
     };
 
@@ -57,21 +72,17 @@ const ExpertInfoPage = () => {
         fetchInfo();
     }, [id]);
 
-    // Manual carousel navigation
-    const prevImage = () => {
-        setCurrentIndex(prev => (prev === 0 ? pexelsImages.length - 1 : prev - 1));
-    };
-
-    const nextImage = () => {
-        setCurrentIndex(prev => (prev === pexelsImages.length - 1 ? 0 : prev + 1));
-    };
-
     const handleHireClick = () => {
         setShowHireModal(true);
     };
 
     const handleHireSubmit = async () => {
         if (isHiring) return;
+
+        if (!hireMessage.trim()) {
+            alert('Please enter a message describing your requirements.');
+            return;
+        }
         
         setIsHiring(true);
         try {
@@ -86,20 +97,20 @@ const ExpertInfoPage = () => {
             const data = await response.json();
             
             if (response.ok) {
-                alert('Booking request sent successfully! The expert will review your request.');
+                alert(`Booking request sent successfully! ${info.name} will review your request and get back to you.`);
                 setShowHireModal(false);
                 setHireMessage('');
                 
-                // Trigger a custom event to notify expert dashboard to refresh
+                // Trigger custom event to notify expert dashboard
                 window.dispatchEvent(new CustomEvent('bookingCreated', { 
                     detail: { expertId: id, booking: data.booking } 
                 }));
             } else {
-                alert(data.message || 'Failed to send booking request');
+                alert(data.message || 'Failed to send booking request. Please try again.');
             }
         } catch (error) {
             console.error('Error sending booking request:', error);
-            alert('Failed to send booking request. Please try again.');
+            alert('Network error. Please check your connection and try again.');
         } finally {
             setIsHiring(false);
         }
@@ -110,48 +121,153 @@ const ExpertInfoPage = () => {
         setHireMessage('');
     };
 
+    const handleClose = () => {
+        navigate(-1); // Go back to previous page
+    };
+
+    // Star rating display
+    const StarRating = ({ rating = 4 }) => {
+        return (
+            <span style={{ color: '#fbbf24', fontSize: '18px', letterSpacing: '2px' }}>
+                {Array.from({ length: 5 }, (_, i) => (
+                    <span key={i} style={{ color: i < rating ? '#fbbf24' : '#e5e7eb' }}>
+                        ★
+                    </span>
+                ))}
+            </span>
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className='mainInfo'>
+                <div className='infoBox'>
+                    <p style={{ textAlign: 'center', padding: '60px 0', fontSize: '18px', color: '#64748b' }}>
+                        Loading expert information...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className='mainInfo'>
+                <div className='infoBox'>
+                    <X size={20} className="closeBtn" onClick={handleClose} />
+                    <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+                        <AlertCircle size={48} color="#dc2626" style={{ margin: '0 auto 20px' }} />
+                        <p style={{ fontSize: '20px', color: '#dc2626', fontWeight: '600', marginBottom: '12px' }}>
+                            {error}
+                        </p>
+                        <button 
+                            onClick={handleClose}
+                            style={{
+                                marginTop: '24px',
+                                padding: '12px 32px',
+                                background: '#f97316',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '10px',
+                                cursor: 'pointer',
+                                fontWeight: '600'
+                            }}
+                        >
+                            Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className='mainInfo'>
             <div className='infoBox'>
-                <X size={20} color='white' strokeWidth={5} className="closeBtn" onClick={() => window.history.back()} />
-                {info ? (
+                <X size={20} className="closeBtn" onClick={handleClose} />
+                
+                {info && (
                     <>
+                        {/* Profile Image */}
                         <img src={Profile} alt="Profile Picture" />
-                        <p className='line'><strong>Name:</strong> {info.name}</p>
-                        <p className='line'><strong>Work Field:</strong> {info.profession}</p>
-                        <p className='line'><strong>Rating:</strong> ★★★★☆</p>
-                        <p className='line'><strong>Location:</strong> {info.location}</p>
-                        <p className='line'><strong>Experience:</strong> {info.exp} Years</p>
-                        <p className='line'><strong>Phone:</strong> {info.contact}</p>
-                        <button className='hireButton' onClick={handleHireClick}>Hire Now</button>
-
-                        <div style={{ margin: "30px 0", color: "#272727" }} />
                         
-                        <hr />
+                        {/* Info Lines with Icons */}
+                        <p className='line'>
+                            <strong>Name:</strong> {info.name}
+                        </p>
+                        
+                        <p className='line'>
+                            <strong>Profession:</strong> {info.profession}
+                        </p>
+                        
+                        <p className='line'>
+                            <strong>Rating:</strong> <StarRating rating={info.rating || 4} />
+                        </p>
+                        
+                        <p className='line'>
+                            <strong>Location:</strong> {info.location}
+                        </p>
+                        
+                        <p className='line'>
+                            <strong>Experience:</strong> {info.exp} Year{info.exp !== 1 ? 's' : ''}
+                        </p>
+                        
+                        <p className='line'>
+                            <strong>Phone:</strong> {info.contact}
+                        </p>
 
+                        {/* Hire Button */}
+                        <button className='hireButton' onClick={handleHireClick}>
+                            Hire Now
+                        </button>
+
+                        {/* Portfolio Images */}
                         {pexelsImages.length > 0 && (
-                            <div className="carousel">
-                                <img 
-                                    src={pexelsImages[(currentIndex - 1 + pexelsImages.length) % pexelsImages.length].src.medium} 
-                                    alt="previous" 
-                                    className="side-image"
-                                />
-                                <img 
-                                    src={pexelsImages[currentIndex].src.medium} 
-                                    alt="current" 
-                                    className="main-image"
-                                />
-                                <img 
-                                    src={pexelsImages[(currentIndex + 1) % pexelsImages.length].src.medium} 
-                                    alt="next" 
-                                    className="side-image"
-                                />
-                            </div>
+                            <>
+                                <hr />
+                                <h3 style={{ 
+                                    textAlign: 'center', 
+                                    color: '#0f172a', 
+                                    marginBottom: '24px',
+                                    fontSize: '20px',
+                                    fontWeight: '700'
+                                }}>
+                                    Portfolio Gallery
+                                </h3>
+                                <div className="carousel">
+                                    {pexelsImages.length > 2 && (
+                                        <img 
+                                            src={pexelsImages[(currentIndex - 1 + pexelsImages.length) % pexelsImages.length].src.medium} 
+                                            alt="previous work" 
+                                            className="side-image"
+                                            onClick={() => setCurrentIndex((currentIndex - 1 + pexelsImages.length) % pexelsImages.length)}
+                                        />
+                                    )}
+                                    <img 
+                                        src={pexelsImages[currentIndex].src.medium} 
+                                        alt="current work" 
+                                        className="main-image"
+                                    />
+                                    {pexelsImages.length > 2 && (
+                                        <img 
+                                            src={pexelsImages[(currentIndex + 1) % pexelsImages.length].src.medium} 
+                                            alt="next work" 
+                                            className="side-image"
+                                            onClick={() => setCurrentIndex((currentIndex + 1) % pexelsImages.length)}
+                                        />
+                                    )}
+                                </div>
+                                <p style={{ 
+                                    textAlign: 'center', 
+                                    color: '#94a3b8', 
+                                    fontSize: '14px',
+                                    marginTop: '16px'
+                                }}>
+                                    {currentIndex + 1} of {pexelsImages.length}
+                                </p>
+                            </>
                         )}
-
                     </>
-                ) : (
-                    <p>Loading...</p>
                 )}
             </div>
 
@@ -161,52 +277,28 @@ const ExpertInfoPage = () => {
                     <div className="hire-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>Hire {info?.name}</h3>
-                            <X size={20} onClick={closeHireModal} style={{ cursor: 'pointer' }} />
+                            <X size={24} onClick={closeHireModal} />
                         </div>
                         <div className="modal-body">
-                            <p>Send a message to {info?.name} about your requirements:</p>
+                            <p>
+                                Send a detailed message to <strong>{info?.name}</strong> about your project requirements:
+                            </p>
                             <textarea
                                 value={hireMessage}
                                 onChange={(e) => setHireMessage(e.target.value)}
-                                placeholder="Describe your project requirements, timeline, and any specific details..."
-                                rows={4}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '5px',
-                                    resize: 'vertical',
-                                    fontFamily: 'inherit'
-                                }}
+                                placeholder="Example: I need a plumber to fix a leaking pipe in my kitchen. The job should be done within 2 days. Please let me know your availability and rates."
+                                rows={6}
                             />
                         </div>
                         <div className="modal-footer">
-                            <button 
-                                onClick={closeHireModal}
-                                style={{
-                                    padding: '10px 20px',
-                                    marginRight: '10px',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '5px',
-                                    backgroundColor: '#f5f5f5',
-                                    cursor: 'pointer'
-                                }}
-                            >
+                            <button onClick={closeHireModal}>
                                 Cancel
                             </button>
                             <button 
                                 onClick={handleHireSubmit}
-                                disabled={isHiring}
-                                style={{
-                                    padding: '10px 20px',
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    backgroundColor: isHiring ? '#ccc' : '#007bff',
-                                    color: 'white',
-                                    cursor: isHiring ? 'not-allowed' : 'pointer'
-                                }}
+                                disabled={isHiring || !hireMessage.trim()}
                             >
-                                {isHiring ? 'Sending...' : 'Send Request'}
+                                {isHiring ? 'Sending Request...' : 'Send Booking Request'}
                             </button>
                         </div>
                     </div>

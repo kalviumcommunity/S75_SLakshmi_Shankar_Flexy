@@ -1,5 +1,11 @@
+
+// ============================================
+// IMPROVED EXPERT BOOKINGS COMPONENT
+// ============================================
+
 import React, { useEffect, useState } from 'react';
 import { authenticatedFetch } from '../utils/auth';
+import { Calendar, User, Phone, MessageSquare } from 'lucide-react';
 
 const ExpertBookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -12,7 +18,7 @@ const ExpertBookings = () => {
             const data = await response.json();
             
             if (response.ok) {
-                setBookings(data.bookings);
+                setBookings(data.bookings || []);
             } else {
                 console.error('Failed to fetch bookings:', data.message);
             }
@@ -27,6 +33,7 @@ const ExpertBookings = () => {
         if (processingBooking === bookingId) return;
         
         setProcessingBooking(bookingId);
+        
         try {
             const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/update-booking-status', {
                 method: 'PATCH',
@@ -39,7 +46,6 @@ const ExpertBookings = () => {
             const data = await response.json();
             
             if (response.ok) {
-                // Update the booking in the local state
                 setBookings(prevBookings =>
                     prevBookings.map(booking =>
                         booking._id === bookingId
@@ -47,7 +53,7 @@ const ExpertBookings = () => {
                             : booking
                     )
                 );
-                alert(`Booking ${status} successfully!`);
+                alert(`Booking ${status === 'accepted' ? 'accepted' : 'declined'} successfully!`);
             } else {
                 alert(data.message || `Failed to ${status} booking`);
             }
@@ -66,125 +72,84 @@ const ExpertBookings = () => {
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
-            month: 'short',
+            month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
         });
     };
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'pending': return '#ffc107';
-            case 'accepted': return '#28a745';
-            case 'declined': return '#dc3545';
-            default: return '#6c757d';
-        }
-    };
-
     if (loading) {
         return (
-            <div style={{ padding: '20px', textAlign: 'center', color: 'white' }}>
-                <p>Loading bookings...</p>
+            <div className="expert-bookings-container">
+                <div className="loading-state">
+                    <p>Loading booking requests...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div style={{ padding: '20px', color: 'white', minHeight: '100vh' }}>
-            <h2 style={{ marginBottom: '30px', textAlign: 'center' }}>Booking Requests</h2>
+        <div className="expert-bookings-container">
+            <h2>All Booking Requests</h2>
             
             {bookings.length === 0 ? (
-                <div style={{ textAlign: 'center', marginTop: '50px' }}>
+                <div className="empty-state">
+                    <MessageSquare size={64} color="#64748b" style={{ margin: '0 auto 24px' }} />
                     <p>No booking requests yet.</p>
                 </div>
             ) : (
-                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <div className="bookings-list">
                     {bookings.map((booking) => (
-                        <div
-                            key={booking._id}
-                            style={{
-                                backgroundColor: '#333',
-                                borderRadius: '10px',
-                                padding: '20px',
-                                marginBottom: '20px',
-                                border: '1px solid #444'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                        <div key={booking._id} className="booking-card-standalone">
+                            <div className="booking-header">
                                 <div>
-                                    <h3 style={{ margin: '0 0 5px 0', color: '#fff' }}>{booking.clientName}</h3>
-                                    <p style={{ margin: '0', color: '#ccc', fontSize: '14px' }}>
-                                        Phone: {booking.clientPhone}
+                                    <h3>
+                                        <User size={22} style={{ display: 'inline', marginRight: '10px', verticalAlign: 'middle' }} />
+                                        {booking.clientName}
+                                    </h3>
+                                    <p>
+                                        <Phone size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                                        {booking.clientPhone}
                                     </p>
                                 </div>
-                                <span
-                                    style={{
-                                        padding: '5px 15px',
-                                        borderRadius: '20px',
-                                        fontSize: '12px',
-                                        fontWeight: 'bold',
-                                        backgroundColor: getStatusColor(booking.status),
-                                        color: 'white',
-                                        textTransform: 'capitalize'
-                                    }}
-                                >
+                                <span className={`status-badge ${booking.status}`}>
                                     {booking.status}
                                 </span>
                             </div>
 
                             {booking.message && (
-                                <div style={{ marginBottom: '15px' }}>
-                                    <p style={{ margin: '0 0 5px 0', fontWeight: 'bold', color: '#fff' }}>Message:</p>
-                                    <p style={{ 
-                                        margin: '0', 
-                                        color: '#ddd', 
-                                        backgroundColor: '#444', 
-                                        padding: '10px', 
-                                        borderRadius: '5px',
-                                        fontStyle: 'italic'
-                                    }}>
-                                        "{booking.message}"
-                                    </p>
+                                <div className="booking-message">
+                                    <p><strong>Message from client:</strong></p>
+                                    <p>"{booking.message}"</p>
                                 </div>
                             )}
 
-                            <div style={{ marginBottom: '15px', fontSize: '14px', color: '#aaa' }}>
-                                <p style={{ margin: '0' }}>Requested on: {formatDate(booking.createdAt)}</p>
+                            <div className="booking-dates">
+                                <p>
+                                    <Calendar size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                                    <strong>Requested:</strong> {formatDate(booking.createdAt)}
+                                </p>
                                 {booking.updatedAt !== booking.createdAt && (
-                                    <p style={{ margin: '0' }}>Updated: {formatDate(booking.updatedAt)}</p>
+                                    <p>
+                                        <strong>Updated:</strong> {formatDate(booking.updatedAt)}
+                                    </p>
                                 )}
                             </div>
 
                             {booking.status === 'pending' && (
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div className="booking-actions">
                                     <button
+                                        className="accept"
                                         onClick={() => handleBookingAction(booking._id, 'accepted')}
                                         disabled={processingBooking === booking._id}
-                                        style={{
-                                            padding: '10px 20px',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            backgroundColor: processingBooking === booking._id ? '#ccc' : '#28a745',
-                                            color: 'white',
-                                            cursor: processingBooking === booking._id ? 'not-allowed' : 'pointer',
-                                            fontWeight: 'bold'
-                                        }}
                                     >
                                         {processingBooking === booking._id ? 'Processing...' : 'Accept'}
                                     </button>
                                     <button
+                                        className="decline"
                                         onClick={() => handleBookingAction(booking._id, 'declined')}
                                         disabled={processingBooking === booking._id}
-                                        style={{
-                                            padding: '10px 20px',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            backgroundColor: processingBooking === booking._id ? '#ccc' : '#dc3545',
-                                            color: 'white',
-                                            cursor: processingBooking === booking._id ? 'not-allowed' : 'pointer',
-                                            fontWeight: 'bold'
-                                        }}
                                     >
                                         {processingBooking === booking._id ? 'Processing...' : 'Decline'}
                                     </button>

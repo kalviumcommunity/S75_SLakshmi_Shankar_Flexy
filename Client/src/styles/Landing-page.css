@@ -1,177 +1,124 @@
-/* html, body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden; 
-} */
+/* ============================================
+   FLEXY LANDING PAGE - PROFESSIONAL REDESIGN
+   Modern, Clean, Trust-Inspiring Design
+   ============================================ */
 
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    line-height: 1.6;
+    color: #1e293b;
+}
+
+/* Main Wrapper */
 .landing-wrapper {
-    /* display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh; */
-    /* width: 100%; */
-    padding: 20px;
-    overflow: hidden; 
+    padding: 40px 20px;
 }
 
+/* Landing Box Container */
 .landing-box {
-    background-color: rgb(231, 120, 17);
+    background: #ffffff;
     width: 100%;
-    max-width: 95%;
+    max-width: 1400px;
     display: flex;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
-    padding: 50px;
-    gap: 50px;
-    overflow: hidden; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
 }
 
+/* Left Section - Content */
 .left-section {
     flex: 1;
-    color: #000000;
-    line-height: 1.6;
-    overflow: hidden; 
-}
-
-.left-section h1 {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    font-weight: 700;
-    text-decoration: underline;
-}
-
-.left-section h3 {
-    margin-top: 20px;
-    margin-bottom: 8px;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.left-section p {
-    margin-bottom: 12px;
-    font-size: large;
-}
-
-.left-section ul {
-    margin: 10px 0 20px;
-    padding-left: 20px;
-    font-size: 15px;
-    list-style: none;
-}
-
-.left-section ul li {
-    margin-bottom: 8px;
-}
-
-.divider {
-    width: 3px;
-    background-color: rgba(0, 0, 0, 0.7);
-}
-
-.right-section {
-    flex: 0.5;
+    padding: 60px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #1e293b;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 20px;
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    text-align: center;
-    overflow: hidden; 
 }
 
-.right-section h2 {
-    margin-bottom: 10px;
-    color: #000000;
-    padding-bottom: 20%;
-    font-size: 40px;
-}
-
-.option {
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.3s ease-out;
-    overflow: hidden; 
-}
-
-.option:hover {
-    transform: translateX(-10px);
-}
-
-.option a {
-    text-decoration: none;
-    color: #000000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
-
-.underline {
-    height: 3px;
-    width: 100%;
-    background-color: rgb(0, 0, 0);
-    margin-top: 4px;
-}
-
+/* Logo Styling */
 .flexy-logo {
-    width: 90px;
-    height: auto;
-    margin-bottom: 20px;
-    transition: transform 0.5s ease-in-out;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 24px;
+    padding: 12px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    transition: transform 0.5s ease;
 }
 
 .flexy-logo:hover {
-    transform: rotate(180deg);
+    transform: rotate(360deg) scale(1.05);
 }
 
-.clientLogo, .expertLogo {
-    width: 38px;
-    height: 38px;
+/* Typography */
+.left-section h1 {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
 }
 
-.clientTitle, .expertTitle {
-    font-weight: bolder;
-    font-size: 1.4rem;
-    letter-spacing: 1.7rem;
-    padding-left: 5vh;
-    transition: letter-spacing 1s, color 1s;
-}
-.clientTitle:hover, .expertTitle:hover {
-    letter-spacing: 2rem;
-    color: white;
+.tagline {
+    font-size: 1.25rem;
+    color: #64748b;
+    margin-bottom: 40px;
+    font-weight: 500;
 }
 
+.left-section h3 {
+    margin-top: 32px;
+    margin-bottom: 12px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+}
 
+.left-section p {
+    margin-bottom: 16px;
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.8;
+}
+
+/* Animated Offer Container */
 .offer-container {
     position: relative;
-    height: 2.5rem; 
+    min-height: 80px;
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border-left: 4px solid #f97316;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
     overflow: hidden;
 }
 
 .offer-text {
-    font-size: 1.2rem;
-    font-weight: 500;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1e293b;
     opacity: 0;
     position: absolute;
-    width: 100%;
-    text-align: left;
-    animation: fadeSlide 12s ease-in-out infinite;
-    overflow: hidden; 
-}
-.offer-text:nth-child(1) {
-    animation-delay: 0s;
-}
-.offer-text:nth-child(2) {
-    animation-delay: 3s;
-}
-.offer-text:nth-child(3) {
-    animation-delay: 6s;
-}
-.offer-text:nth-child(4) {
-    animation-delay: 9s;
+    width: calc(100% - 48px);
+    animation: fadeSlide 3.5s ease-in-out infinite;
 }
 
 @keyframes fadeSlide {
@@ -179,20 +126,252 @@
         opacity: 0;
         transform: translateY(20px);
     }
-    10% {
+    10%, 80% {
         opacity: 1;
         transform: translateY(0);
-    }
-    25% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    35% {
-        opacity: 0;
-        transform: translateY(-20px);
     }
     100% {
         opacity: 0;
         transform: translateY(-20px);
+    }
+}
+
+/* Stats Section (Optional - Add to JSX if desired) */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 32px 0;
+    padding: 24px;
+    background: #f1f5f9;
+    border-radius: 12px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* Mission Box */
+.left-section > p:last-of-type {
+    background: #f1f5f9;
+    border-left: 4px solid #f97316;
+    padding: 24px;
+    border-radius: 12px;
+    margin-top: 24px;
+}
+
+/* Divider */
+.divider {
+    display: none;
+}
+
+/* Right Section - CTA */
+.right-section {
+    flex: 0 0 480px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.right-section h2 {
+    font-size: 2.5rem;
+    color: #ffffff;
+    margin-bottom: 16px;
+    font-weight: 800;
+}
+
+.right-section > p {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    margin-bottom: 48px;
+    max-width: 360px;
+}
+
+/* Option Cards */
+.option {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+}
+
+.option:hover {
+    transform: translateY(-8px);
+}
+
+.option a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.option a:hover {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.3);
+}
+
+/* Client Option Specific */
+.clientTitle {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1.75rem;
+    transition: color 0.3s ease;
+}
+
+.option a:hover .clientTitle,
+.option a:hover .expertTitle {
+    color: #ffffff;
+}
+
+.clientTitle::after {
+    content: "Hire skilled experts";
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #64748b;
+    margin-top: 8px;
+    transition: color 0.3s ease;
+}
+
+.option a:hover .clientTitle::after {
+    color: #fed7aa;
+}
+
+/* Expert Option Specific */
+.expertTitle {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1.75rem;
+    transition: color 0.3s ease;
+}
+
+.expertTitle::after {
+    content: "Find opportunities";
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #64748b;
+    margin-top: 8px;
+    transition: color 0.3s ease;
+}
+
+.option a:hover .expertTitle::after {
+    color: #fed7aa;
+}
+
+/* Logo Images */
+.clientLogo, .expertLogo {
+    width: 48px;
+    height: 48px;
+    transition: all 0.3s ease;
+}
+
+.option a:hover .clientLogo,
+.option a:hover .expertLogo {
+    filter: brightness(0) invert(1);
+    transform: scale(1.1);
+}
+
+/* Remove underline */
+.underline {
+    display: none;
+}
+
+/* Trust Indicators (Optional - Add to JSX) */
+.trust-indicators {
+    display: flex;
+    gap: 24px;
+    margin-top: 48px;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .landing-box {
+        flex-direction: column;
+    }
+    
+    .right-section {
+        flex: 1;
+        padding: 48px 40px;
+    }
+    
+    .left-section {
+        padding: 48px 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .left-section h1 {
+        font-size: 2.25rem;
+    }
+    
+    .right-section h2 {
+        font-size: 2rem;
+    }
+    
+    .left-section,
+    .right-section {
+        padding: 32px 24px;
+    }
+    
+    .option {
+        max-width: 100%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-wrapper {
+        padding: 20px 10px;
+    }
+    
+    .landing-box {
+        border-radius: 16px;
+    }
+    
+    .left-section h1 {
+        font-size: 1.875rem;
+    }
+    
+    .offer-text {
+        font-size: 1rem;
     }
 }

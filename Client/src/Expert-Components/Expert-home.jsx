@@ -1,22 +1,35 @@
-// ExpertHome.jsx
+// ============================================
+// IMPROVED EXPERT HOME COMPONENT
+// ============================================
+
 import React, { useEffect, useState } from "react";
 import "../styles/ExpertsHome.css";
 import { authenticatedFetch } from '../utils/auth';
+import { User, Phone, Briefcase, Calendar, MessageSquare, AlertCircle } from 'lucide-react';
 
 const ExpertHome = () => {
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingBooking, setProcessingBooking] = useState(null);
+  const [error, setError] = useState(null);
 
   const getUser = async () => {
     try {
+      const expertId = localStorage.getItem('expertId');
+      
+      if (!expertId) {
+        setError('Expert ID not found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(
         "https://flexy-backend.onrender.com/api/get-by-id",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ _id: localStorage.getItem('expertId') }), // pass logged-in expert ID
+          body: JSON.stringify({ _id: expertId }),
           credentials: 'include'
         }
       );
@@ -26,9 +39,11 @@ const ExpertHome = () => {
         setUser(data);
       } else {
         console.error("Failed to fetch expert:", response);
+        setError('Failed to load profile information');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching user:', err);
+      setError('Network error. Please try again.');
     }
   };
 
@@ -38,7 +53,7 @@ const ExpertHome = () => {
       const data = await response.json();
       
       if (response.ok) {
-        setBookings(data.bookings);
+        setBookings(data.bookings || []);
       } else {
         console.error('Failed to fetch bookings:', data.message);
       }
@@ -53,6 +68,7 @@ const ExpertHome = () => {
     if (processingBooking === bookingId) return;
     
     setProcessingBooking(bookingId);
+    
     try {
       const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/update-booking-status', {
         method: 'PATCH',
@@ -65,6 +81,7 @@ const ExpertHome = () => {
       const data = await response.json();
       
       if (response.ok) {
+        // Update booking in local state
         setBookings(prevBookings =>
           prevBookings.map(booking =>
             booking._id === bookingId
@@ -72,10 +89,13 @@ const ExpertHome = () => {
               : booking
           )
         );
-        await fetchBookings(); // Refresh bookings after successful action
-        alert(`Booking ${status}ed successfully!`);
         
-        // Notify other components that booking status changed
+        // Refresh bookings list
+        await fetchBookings();
+        
+        alert(`Booking ${status === 'accepted' ? 'accepted' : 'declined'} successfully!`);
+        
+        // Notify other components
         window.dispatchEvent(new CustomEvent('bookingStatusChanged', { 
           detail: { bookingId, status } 
         }));
@@ -84,19 +104,17 @@ const ExpertHome = () => {
       }
     } catch (error) {
       console.error(`Error ${status}ing booking:`, error);
-      alert(`Failed to ${status} booking. Please try again.`);
+      alert(`Network error. Failed to ${status} booking.`);
     } finally {
       setProcessingBooking(null);
     }
   };
 
-
   useEffect(() => {
     getUser();
     fetchBookings();
-    console.log(localStorage.getItem('expertId'))
 
-    // Listen for new booking events to refresh automatically
+    // Listen for new booking events
     const handleBookingCreated = () => {
       fetchBookings();
     };
@@ -106,33 +124,102 @@ const ExpertHome = () => {
     return () => {
       window.removeEventListener('bookingCreated', handleBookingCreated);
     };
-  }, [])
+  }, []);
+
+  const pendingBookings = bookings.filter(booking => booking.status === 'pending');
+
+  if (error) {
+    return (
+      <div className="expert-home">
+        <div className="profile-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
+          <AlertCircle size={48} color="#dc2626" style={{ margin: '0 auto 20px' }} />
+          <h3 style={{ color: '#dc2626', marginBottom: '12px', fontSize: '20px' }}>{error}</h3>
+          <button 
+            onClick={() => window.location.href = '/expert-login'}
+            style={{
+              marginTop: '24px',
+              padding: '12px 32px',
+              background: '#f97316',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="expert-home">
-      {/* Profile Section */}
       <div className="profile-card">
+        {/* Profile Section */}
         <div className="profile-details">
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Contact:</strong> {user.contact}</p>
-          <p><strong>Profession:</strong> {user.profession}</p>
+          <p>
+            <strong><User size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />Name:</strong> 
+            {user?.name || 'Loading...'}
+          </p>
+          <p>
+            <strong><Phone size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />Contact:</strong> 
+            {user?.contact || 'Loading...'}
+          </p>
+          <p>
+            <strong><Briefcase size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />Profession:</strong> 
+            {user?.profession || 'Loading...'}
+          </p>
         </div>
 
+        {/* Bookings Section */}
         <div className="booking-card">
-          <h4>Booking Requests</h4>
+          <h4>
+            <MessageSquare size={24} style={{ display: 'inline', marginRight: '12px', verticalAlign: 'middle' }} />
+            Pending Booking Requests
+            {pendingBookings.length > 0 && (
+              <span style={{ 
+                marginLeft: '12px', 
+                background: '#f97316', 
+                color: 'white', 
+                padding: '4px 12px', 
+                borderRadius: '12px', 
+                fontSize: '14px',
+                fontWeight: '700'
+              }}>
+                {pendingBookings.length}
+              </span>
+            )}
+          </h4>
+
           {loading ? (
-            <p>Loading bookings...</p>
-          ) : bookings.length === 0 ? (
-            <p>No booking requests yet.</p>
+            <p>Loading booking requests...</p>
+          ) : pendingBookings.length === 0 ? (
+            <p>No pending booking requests at the moment.</p>
           ) : (
-            bookings.filter(booking => booking.status === 'pending').map((booking) => (
-              <div key={booking._id} style={{ marginBottom: '15px', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}>
-                <p><strong>Client:</strong> {booking.clientName}</p>
-                <p><strong>Phone:</strong> {booking.clientPhone}</p>
+            pendingBookings.map((booking) => (
+              <div key={booking._id} className="booking-item">
+                <p>
+                  <strong>Client Name:</strong> {booking.clientName}
+                </p>
+                <p>
+                  <strong>Phone Number:</strong> {booking.clientPhone}
+                </p>
                 {booking.message && (
-                  <p><strong>Message:</strong> "{booking.message}"</p>
+                  <p>
+                    <strong>Message:</strong> "{booking.message}"
+                  </p>
                 )}
-                <p><strong>Date:</strong> {new Date(booking.createdAt).toLocaleDateString()}</p>
+                <p>
+                  <strong><Calendar size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                  Requested:</strong> {new Date(booking.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+                
                 <div className="buttons">
                   <button 
                     className="accept"
@@ -154,9 +241,9 @@ const ExpertHome = () => {
           )}
         </div>
       </div>
-
     </div>
   );
 };
 
 export default ExpertHome;
+

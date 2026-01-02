@@ -5,11 +5,11 @@ import expert from './assests/expert.png';
 import logo from './assests/logo.png';
 
 const offers = [
-    "🗒 Real-time availability of workers & experts",
-    "🗒 Instant booking & secure payments",
-    "🗒 Verified professionals and trusted clients",
-    "🗒 Transparent profiles and ratings",
-    "🗒 Easy onboarding and smooth communication"
+    "✓ Real-time availability of workers & experts",
+    "✓ Instant booking & secure payments",
+    "✓ Verified professionals and trusted clients",
+    "✓ Transparent profiles and ratings",
+    "✓ Easy onboarding and smooth communication"
 ];
 
 const LandingPage = () => {
@@ -27,8 +27,9 @@ const LandingPage = () => {
             <div className="landing-box">
                 {/* Left Section */}
                 <div className="left-section">
-                    <img className="flexy-logo" src={logo} alt="Flexy Logo" title='IT IS FLEXY' />
-                    <h1>Welcome to Flexy</h1>
+                    <img className="flexy-logo" src={logo} alt="Flexy Logo" title="Flexy Platform" />
+                    
+                    <h1>Flexy</h1>
                     <p className="tagline">Your bridge between skills and opportunities.</p>
                     
                     <h3>Why Flexy?</h3>
@@ -40,7 +41,7 @@ const LandingPage = () => {
 
                     <h3>What we offer</h3>
                     <div className="offer-container">
-                        <p key={currentOfferIndex} className="offer-text">
+                        <p className="offer-text">
                             {offers[currentOfferIndex]}
                         </p>
                     </div>
@@ -54,22 +55,29 @@ const LandingPage = () => {
                     </p>
                 </div>
 
-                {/* Divider */}
-                <div className="divider"></div>
-
                 {/* Right Section */}
                 <div className="right-section">
-                    <h2>Get Started As</h2>
+                    <h2>Get Started</h2>
+                    <p>Choose your path and join thousands of satisfied users</p>
+                    
                     <div className="option">
-                        <a href="/client-sign-up" className="clientTitle">
-                            CLIENT <img src={client} className="clientLogo" alt="Client" />
+                        <a href="/client-sign-up">
+                            <span className="clientTitle">I'm a Client</span>
+                            <img src={client} className="clientLogo" alt="Client" />
                         </a>
                     </div>
-                    <div className="underline" />
+                    
                     <div className="option">
-                        <a href="/expert-sign-up" className="expertTitle">
-                            EXPERT <img src={expert} className="expertLogo" alt="Expert" />
+                        <a href="/expert-sign-up">
+                            <span className="expertTitle">I'm an Expert</span>
+                            <img src={expert} className="expertLogo" alt="Expert" />
                         </a>
+                    </div>
+
+                    <div className="trust-indicators">
+                        <span className="trust-item">🛡️ Secure</span>
+                        <span className="trust-item">✓ Verified</span>
+                        <span className="trust-item">⭐ Trusted</span>
                     </div>
                 </div>
             </div>

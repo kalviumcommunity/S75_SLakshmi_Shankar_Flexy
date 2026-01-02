@@ -1,254 +1,505 @@
-/* Container & Layout */
-.expert-signup__container {
-    height: 100vh;
-    background-color: #0D0D0D;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .expert-signup__card {
-    background: #1A1A1A;
-    width: 750px;
-    display: flex;
-    padding: 40px;
-    border-radius: 6px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Form Section */
-  .expert-signup__form-section {
-    flex: 1;
-    padding-right: 20px;
-  }
-  
-  .expert-signup__heading {
-    text-align: center;
-    margin-bottom: 24px;
-    font-size: 26px;
-    color: #333;
-  }
+/* ============================================
+   FLEXY EXPERT AUTH - PROFESSIONAL REDESIGN
+   Multi-Step Sign Up & Login
+   ============================================ */
 
-  .signup-title {
-    color: #FF7A00;
-  }
-  
-  .expert-signup__form {
+/* ==================== SIGN UP PAGE ==================== */
+
+/* Container */
+.expert-signup__container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Main Card */
+.expert-signup__card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    padding: 0;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Section */
+.expert-signup__form-section {
+    flex: 1;
+    padding: 48px 40px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.signup-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 32px;
+}
+
+.signup-title a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.signup-title a:hover {
+    background: #fee2e2;
+    transform: rotate(90deg);
+}
+
+.signup-title a svg {
+    color: #64748b !important;
+}
+
+.signup-title a:hover svg {
+    color: #dc2626 !important;
+}
+
+/* Form */
+.expert-signup__form {
     display: flex;
     flex-direction: column;
-  }
-  
-  .expert-signup__form-group {
+    gap: 8px;
+}
+
+.expert-signup__form-group {
     margin-bottom: 16px;
-  }
-  
-  .expert-signup__input {
-    width: 350px;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  
-  .expert-signup__input-file {
-    font-size: 13px;
-    padding: 5px;
-  }
-  
-  .expert-signup__form-row {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .expert-signup__input.small {
-    width: 80px;
-  }
-  
-  /* Buttons */
-  .expert-signup__button {
-    background-color: #FF7A00;
-    color: #fff;
-    padding: 10px 16px;
-    font-size: 14px;
-    font-weight: bolder;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: fit-content;
-    transition: letter-spacing 0.2s ease;
-  }
-  
-  .expert-signup__button:hover {
-    letter-spacing: 2px;
-  }
-  
-  .expert-signup__side-button {
+}
+
+/* Input Fields */
+.expert-signup__input {
     width: 100%;
-    margin-bottom: 14px;
-  }
-  
-  /* Divider Section */
-  .expert-signup__divider-section {
-    width: 160px;
-    border-left: 3px solid #ffffff;
-    padding-left: 20px;
+    padding: 16px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.expert-signup__input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.expert-signup__input:focus {
+    border-color: #f97316;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    background: #fffbf5;
+}
+
+/* Form Row (Profession + Experience) */
+.expert-signup__form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.expert-signup__form-row .expert-signup__input {
+    flex: 1;
+}
+
+.expert-signup__input.small {
+    flex: 0 0 140px;
+}
+
+/* Error Messages */
+.expert-signup__error {
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 6px;
+    margin-bottom: 0;
+    display: block;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Right Section */
+.expert-signup__divider-section {
+    flex: 0 0 320px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 48px 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
-  
-  /* "Or" Divider */
-  .expert-signup__or-divider {
+    text-align: center;
+}
+
+/* Progress Indicator */
+.progress-indicator {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+.progress-step {
+    width: 50px;
+    height: 4px;
+    background: #334155;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active {
+    background: #f97316;
+}
+
+/* Buttons */
+.expert-signup__button {
+    width: 100%;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+    padding: 18px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+}
+
+.expert-signup__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.5);
+}
+
+.expert-signup__button:active {
+    transform: translateY(0);
+}
+
+.expert-signup__side-button {
+    margin-bottom: 24px;
+}
+
+/* Or Divider */
+.expert-signup__or-divider {
     display: flex;
     align-items: center;
-    font-size: 12px;
-    margin: 10px 0;
-    position: relative;
+    font-size: 14px;
+    margin: 24px 0;
+    color: #94a3b8;
+    font-weight: 500;
     width: 100%;
-    justify-content: center;
-    color: white;
-  }
-  
-  .expert-signup__or-divider::before,
-  .expert-signup__or-divider::after {
+}
+
+.expert-signup__or-divider::before,
+.expert-signup__or-divider::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: #ffffff;
-    margin: 0 6px;
-  }
+    background: #334155;
+    margin: 0 12px;
+}
 
-  .link {
-    color: #FF7A00;
-    font-weight: 800;
-  }
-  
-  /* Text Note */
-  .expert-signup__text-muted {
-    font-size: 12px;
-    color: #ffffff;
-    text-align: center;
+/* Link Text */
+.expert-signup__text-muted {
+    font-size: 14px;
+    color: #94a3b8;
     text-decoration: none;
-  }
+    transition: color 0.3s ease;
+}
 
-  .expert-signup__error{
-    color: red;
-    font-size: smaller;
-    margin-bottom: -20px;
-    margin-left: 2px;
-  }
+.expert-signup__text-muted .link {
+    color: #f97316;
+    font-weight: 700;
+    display: inline;
+}
 
+.expert-signup__text-muted:hover {
+    color: #cbd5e1;
+}
 
+/* ==================== LOGIN PAGE ==================== */
 
-
-
-
-
-
-
-  .expert-login-container {
+/* Container */
+.expert-login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background-color: #0D0D0D;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;;
-  }
-  
-  .expert-login-card {
-    background: #1A1A1A;
-    border-radius: 5px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 40px 20px;
+}
+
+/* Card */
+.expert-login-card {
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     display: flex;
-    width: 800px;
-    max-width: 95%;
-    padding: 50px;
-  }
-  
-  .expert-login-left,
-  .expert-login-right {
+    width: 100%;
+    max-width: 900px;
+    padding: 0;
+    overflow: hidden;
+    animation: slideUp 0.4s ease;
+}
+
+/* Left Section */
+.expert-login-left {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 20px;
     justify-content: center;
-  }
-  
-  .expert-login-left h2 {
-    margin-bottom: 10px;
-    text-align: center;
-    color: #FF7A00;
-  }
-  
-  .expert-login-left input {
-    padding: 12px 16px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    width: 300px;
-  }
-  
-  .password-field {
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-  
-  .password-field span {
-    margin-left: -50px;
-    right: 16px;
-    cursor: pointer;
-    color: #7f7f7f;
+    padding: 48px 40px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.expert-login-left h2 {
+    margin: 0 0 24px 0;
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.expert-login-left input {
+    padding: 16px 18px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
     font-weight: 500;
-  }
-  
-  .expert-login-divider {
-    width: 3px;
-    background-color: white;
-    margin: 0 20px;
-  }
-  
-  .login-btn {
-    padding: 12px;
-    background-color: #FF7A00 ;
+    color: #1e293b;
+}
+
+.expert-login-left input::placeholder {
+    color: #94a3b8;
+}
+
+.expert-login-left input:focus {
+    border-color: #f97316;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    background: #fffbf5;
+}
+
+/* Password Field */
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    padding-right: 70px;
+}
+
+.password-field span {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 6px 12px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.password-field span:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* Divider */
+.expert-login-divider {
+    display: none;
+}
+
+/* Right Section */
+.expert-login-right {
+    flex: 0 0 320px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 40px;
+}
+
+/* Login Button */
+.login-btn {
+    width: 100%;
+    padding: 18px 32px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
-    transition: letter-spacing 0.3s ease-in-out;
-  }
-  
-  .login-btn:hover {
-    letter-spacing: 2.5px;
-  }
-  
-  .or {
-    text-align: center;
-    color: #ffffff;
-  }
-  
-  .expert-login-right p {
-    text-align: center;
-    color: #ffffff;
-    font-weight: 500;
-  }
-  
-  .expert-login-right a {
-    color: #FF7A00;
-    text-decoration: none;
-    font-weight: 800;
-  }
-  
-  .expert-login-right a:hover {
-    text-decoration: underline;
-  }
-  
-  .error-message {
-    color: red;
-    margin-top: 10px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.5);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+/* Or Divider */
+.or {
+    color: #94a3b8;
     font-size: 14px;
-  }
-  
+    font-weight: 500;
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.or::before,
+.or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #334155;
+    margin: 0 12px;
+}
+
+/* Link Text */
+.expert-login-right p {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.expert-login-right a {
+    color: #f97316;
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s ease;
+}
+
+.expert-login-right a:hover {
+    color: #fb923c;
+    text-decoration: underline;
+}
+
+/* Error Message */
+.error-message {
+    background: #fee2e2;
+    border: 2px solid #fecaca;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-top: 8px;
+}
+
+.error-message label {
+    color: #991b1b;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .expert-signup__card,
+    .expert-login-card {
+        flex-direction: column;
+        max-width: 95%;
+        border-radius: 16px;
+    }
+
+    .expert-signup__form-section,
+    .expert-login-left {
+        padding: 32px 24px;
+    }
+
+    .expert-signup__divider-section,
+    .expert-login-right {
+        flex: 1;
+        padding: 32px 24px;
+    }
+
+    .signup-title {
+        font-size: 28px;
+    }
+
+    .expert-login-left h2 {
+        font-size: 28px;
+    }
+
+    .expert-signup__form-row {
+        flex-direction: column;
+    }
+
+    .expert-signup__input.small {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .expert-signup__container,
+    .expert-login-container {
+        padding: 20px 10px;
+    }
+
+    .expert-signup__form-section,
+    .expert-login-left {
+        padding: 24px 20px;
+    }
+
+    .expert-signup__divider-section,
+    .expert-login-right {
+        padding: 24px 20px;
+    }
+
+    .signup-title,
+    .expert-login-left h2 {
+        font-size: 24px;
+    }
+}
