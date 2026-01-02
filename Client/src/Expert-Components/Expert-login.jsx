@@ -81,6 +81,7 @@ const ExpertLogin = () => {
 
       if (response.ok) {
         console.log("Login Successful:", data);
+        localStorage.setItem('expertId', data.expertId);
 
         // Store token
         if (data.token) {
