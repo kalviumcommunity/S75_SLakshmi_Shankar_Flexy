@@ -48,9 +48,8 @@ router.post("/expert-login", async (req, res) => {
       sameSite: 'None',
       maxAge: 12 * 60 * 60 * 1000
     });
-    localStorage.setItem('expertId', expert._id);
 
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json({ message: "Login successful", expertId: expert._id });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
