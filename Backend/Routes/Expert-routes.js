@@ -1,18 +1,61 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcrypt');
-const Expert = require('../Schema/Expert-schema');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const auth = require("../middleware/auth")
-require('dotenv').config();
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-const jwt = require('jsonwebtoken');
-const JWT = process.env.JWT_SECRET;
+const Expert = require("../Schema/Expert-schema");
+const auth = require("../middleware/auth");
 
+const JWT_SECRET = process.env.JWT_SECRET;
 
-// Expert Login
+/* -------------------- EXPERT SIGNUP -------------------- */
+router.post("/expert-sign-up", async (req, res) => {
+  try {
+    const { name, contact, profession, exp, location, password } = req.body;
+
+    if (!name || !contact || !profession || !exp || !location || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const existing = await Expert.findOne({ contact });
+    if (existing) {
+      return res.status(409).json({ message: "Expert already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const expert = await Expert.create({
+      name,
+      contact,
+      profession,
+      exp,
+      location,
+      password: hashedPassword
+    });
+
+    const token = jwt.sign(
+      { id: expert._id, role: "expert" },
+      JWT_SECRET,
+      { expiresIn: "12h" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      maxAge: 12 * 60 * 60 * 1000
+    });
+
+    res.status(201).json({
+      message: "Expert registered successfully",
+      expertId: expert._id
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+/* -------------------- EXPERT LOGIN -------------------- */
 router.post("/expert-login", async (req, res) => {
   try {
     const { contact, password } = req.body;
@@ -31,131 +74,73 @@ router.post("/expert-login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: expert.contact }, JWT, {
-      expiresIn: "12h"
-    });
+    const token = jwt.sign(
+      { id: expert._id, role: "expert" },
+      JWT_SECRET,
+      { expiresIn: "12h" }
+    );
 
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'None',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 12 * 60 * 60 * 1000
     });
 
-    res.cookie('name', expert.name, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-      maxAge: 12 * 60 * 60 * 1000
+    res.status(200).json({
+      message: "Login successful",
+      expertId: expert._id
     });
-
-    res.status(200).json({ message: "Login successful", expertId: expert._id });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-// Sign-up route
-router.post("/expert-sign-up", async (req, res) => {
+/* -------------------- GET ALL EXPERTS (CLIENT ONLY) -------------------- */
+router.get("/all-experts", auth, async (req, res) => {
   try {
-    const { name, contact, profession, exp, location, password } = req.body;
+    const experts = await Expert.find().select("-password");
 
-    if (!name || !contact || !profession || !exp || !location || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!experts.length) {
+      return res.status(404).json({ message: "No experts found" });
     }
 
-    // Check if expert already exists
-    const existingExpert = await Expert.findOne({ contact });
-    if (existingExpert) {
-      return res.status(409).json({ message: "Expert already exists with this contact" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const expert = new Expert({
-      name,
-      contact,
-      profession,
-      exp,
-      location,
-      password: hashedPassword
-    });
-
-    await expert.save();
-
-    const token = jwt.sign({ id: expert.contact }, JWT, {
-      expiresIn: "12h"
-    });
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'None',
-      maxAge: 12 * 60 * 60 * 1000
-    });
-
-    res.status(201).json({ message: "Expert registered successfully", expertId: expert._id });
+    res.status(200).json({ experts });
   } catch (err) {
-    console.error("Error in expert-sign-up:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-
-// Get all experts (should be protected)
-router.get('/all-experts', auth, async (req, res) => {
-
+/* -------------------- UPDATE EXPERT (SELF ONLY) -------------------- */
+router.put("/update-account", auth, async (req, res) => {
   try {
-    const allUsers = await Expert.find();
+    const updated = await Expert.findByIdAndUpdate(
+      req.user.id,
+      req.body,
+      { new: true }
+    ).select("-password");
 
-    if (!allUsers || allUsers.length === 0) {
-      return res.status(404).json({ message: "No users found" });
-    }
-
-    const users = allUsers.map(user => ({
-      _id: user._id,
-      name: user.name,
-      contact: user.contact,
-      profession: user.profession,
-      exp: user.exp,
-      location: user.location
-    }));
-
-    res.status(200).json({ message: "Data found", users });
-  } catch (err) {
-    res.status(500).json({
-      message: "Internal server error",
-      error: err.message
+    res.status(200).json({
+      message: "Account updated successfully",
+      expert: updated
     });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-
-// Update
-
-router.put("/update-account/:id", auth, async(req, res) => {
-    try{
-        const userId = req.params.id;
-
-        const newData = req.body;
-
-        if(!userId){
-            return res.status(401).json({
-                message: "All fields are required"
-            })
-        }
-
-        await Expert.findByIdAndUpdate(userId, newData, {new: true});
-        return res.status(200).json({
-            message: "Updated the account"
-        })
-    }
-    catch(err){
-        return res.status(500).json({
-            message: "Internal server error",
-            error: err.message
-        })
-    }
+/* -------------------- LOGOUT -------------------- */
+router.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.status(200).json({ message: "Logged out successfully" });
 });
+
+router.get("/auth-check", auth, (req, res) => {
+  res.json({
+    message: "Auth working",
+    user: req.user
+  });
+});
+
 
 module.exports = router;
