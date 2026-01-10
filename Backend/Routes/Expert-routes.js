@@ -76,6 +76,7 @@ router.post("/expert-sign-up", async (req, res) => {
 
     res.status(201).json({
       message: "Expert registered successfully",
+      token,
       expertId: expert._id,
       expertContact: expert.contact,
       success: true
@@ -126,6 +127,7 @@ router.post("/expert-login", async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
+      token,
       expertId: expert._id,
       expertContact: expert.contact,
       success: true

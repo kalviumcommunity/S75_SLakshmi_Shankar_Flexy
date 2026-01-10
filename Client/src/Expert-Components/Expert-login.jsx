@@ -1,7 +1,3 @@
-// ============================================
-// IMPROVED EXPERT LOGIN COMPONENT
-// ============================================
-
 import React, { useState } from 'react';
 import '../styles/Expert-signup.css';
 import { useNavigate, Link } from 'react-router-dom';
@@ -14,7 +10,7 @@ const ExpertLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState({
-    phone: '',
+    contact: '',
     password: ''
   });
 
@@ -39,10 +35,10 @@ const ExpertLogin = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Phone must be a valid 10-digit number';
+    if (!formData.contact.trim()) {
+      newErrors.contact = 'Contact number is required';
+    } else if (!/^\d{10}$/.test(formData.contact)) {
+      newErrors.contact = 'Contact must be a valid 10-digit number';
     }
     
     if (!formData.password) {
@@ -72,25 +68,31 @@ const ExpertLogin = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          contact: formData.phone,
+          contact: formData.contact,
           password: formData.password
         })
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (response.ok) {
+      if (data.success) {
+        tokenManager.setToken(data.token);
+        navigate("/expert-home");
+      }
+
+      if (data.success) {
         console.log("Login Successful:", data);
         localStorage.setItem('expertId', data.expertId);
+        localStorage.setItem('expertContact', data.expertContact);
 
-        // Store token
+        // Store token if provided
         if (data.token) {
           tokenManager.setToken(data.token);
         }
 
         // Clear form
         setFormData({
-          phone: '',
+          contact: '',
           password: ''
         });
 
@@ -132,17 +134,17 @@ const ExpertLogin = () => {
 
           <input
             type="tel"
-            name="phone"
-            placeholder="Phone Number"
-            value={formData.phone}
+            name="contact"
+            placeholder="Contact Number (10 digits)"
+            value={formData.contact}
             required
             onChange={handleChange}
             maxLength="10"
             disabled={isLoading}
           />
-          {errors.phone && (
+          {errors.contact && (
             <span style={{ color: '#dc2626', fontSize: '13px', fontWeight: '500' }}>
-              {errors.phone}
+              {errors.contact}
             </span>
           )}
 

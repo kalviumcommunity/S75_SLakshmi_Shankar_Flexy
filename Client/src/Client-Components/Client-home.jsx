@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import Cookie from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Client-home.css';
 import Logo from '../assests/logo.png';
 import Loader from './Loader';
-import { MapPin, Search, X, AlertCircle } from 'lucide-react';
-import { authenticatedFetch } from '../utils/auth';
+import { MapPin, Search, X, AlertCircle, LogOut } from 'lucide-react';
+import { authenticatedFetch, logout } from '../utils/auth';
 
 const ClientHome = () => {
     const [allExperts, setAllExperts] = useState([]);
@@ -31,32 +30,33 @@ const ClientHome = () => {
     };
 
     const getExperts = async () => {
-  try {
-    setLoading(true);
-    setError(null);
+        try {
+            setLoading(true);
+            setError(null);
 
-    const response = await authenticatedFetch(
-      'https://flexy-backend.onrender.com/api/all-experts',
-      { method: "GET" }
-    );
+            const response = await authenticatedFetch(
+                'https://flexy-backend.onrender.com/api/all-experts',
+                { method: "GET" }
+            );
 
-    // backend sends: { experts: [...] }
-    const data = await response.json();
-    console.log(data)
-    setAllExperts(data.experts || []);
-    setSearch("");
-    setLocation("");
-    setSearchActive(false);
-
-  } catch (err) {
-    console.error('Error fetching experts:', err);
-    setError(err.message || 'Failed to fetch experts');
-    setAllExperts([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
+            const data = await response.json();
+            
+            if (data.success) {
+                setAllExperts(data.experts || []);
+                setSearch("");
+                setLocation("");
+                setSearchActive(false);
+            } else {
+                throw new Error(data.message || 'Failed to fetch experts');
+            }
+        } catch (err) {
+            console.error('Error fetching experts:', err);
+            setError(err.message || 'Failed to fetch experts');
+            setAllExperts([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getByLocation = async () => {
         if (!locationSet.trim()) {
@@ -69,20 +69,23 @@ const ClientHome = () => {
             setError(null);
             setSearchActive(true);
 
-            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/get-by-location', {
-                method: 'POST',
-                body: JSON.stringify({ location: locationSet })
-            });
+            const response = await authenticatedFetch(
+                'https://flexy-backend.onrender.com/api/get-by-location',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ location: locationSet })
+                }
+            );
 
-            if (response.ok) {
-                const data = await response.json();
-                setAllExperts(data.data);
+            const data = await response.json();
+            
+            if (data.success) {
+                setAllExperts(data.data || []);
                 
-                if (data.data.length === 0) {
+                if (!data.data || data.data.length === 0) {
                     setError(`No experts found in ${locationSet}`);
                 }
             } else {
-                const data = await response.json();
                 setError(data.message || 'Failed to search by location');
             }
         } catch (err) {
@@ -104,20 +107,23 @@ const ClientHome = () => {
             setError(null);
             setSearchActive(true);
 
-            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/get-by-profession', {
-                method: 'POST',
-                body: JSON.stringify({ profession: searchSet })
-            });
+            const response = await authenticatedFetch(
+                'https://flexy-backend.onrender.com/api/get-by-profession',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ profession: searchSet })
+                }
+            );
 
-            if (response.ok) {
-                const data = await response.json();
-                setAllExperts(data.data);
+            const data = await response.json();
+            
+            if (data.success) {
+                setAllExperts(data.data || []);
                 
-                if (data.data.length === 0) {
+                if (!data.data || data.data.length === 0) {
                     setError(`No ${searchSet}s found`);
                 }
             } else {
-                const data = await response.json();
                 setError(data.message || 'Failed to search by profession');
             }
         } catch (err) {
@@ -139,10 +145,6 @@ const ClientHome = () => {
         navigate(`/expert/${_id}`); 
     };
 
-    const handleChat = (expertId) => {
-        navigate(`/chat/${expertId}`);
-    };
-
     // Handle Enter key press
     const handleKeyPress = (e, searchType) => {
         if (e.key === 'Enter') {
@@ -156,8 +158,8 @@ const ClientHome = () => {
 
     useEffect(() => {
         getExperts();
-        const name = Cookie.get('name') || localStorage.getItem('userName') || 'Guest';
-        setUserName(name);
+        const phone = localStorage.getItem('clientPhone') || 'Guest';
+        setUserName(phone);
     }, []);
 
     return (
@@ -165,7 +167,16 @@ const ClientHome = () => {
             {/* Header */}
             <div className='home-header'>
                 <img src={Logo} alt='Flexy' className='home-logo' />
-                <div className='user-name'>Welcome, {userName}!</div>
+                <div className='user-info'>
+                    <div className='user-name'>Welcome, {userName}!</div>
+                    <button 
+                        className='logout-btn' 
+                        onClick={logout}
+                        title="Logout"
+                    >
+                        <LogOut size={18} />
+                    </button>
+                </div>
             </div>
 
             {/* Search Bar */}
@@ -211,18 +222,9 @@ const ClientHome = () => {
 
             {/* Error Message */}
             {error && !loading && (
-                <div style={{
-                    background: '#fee2e2',
-                    border: '2px solid #fecaca',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    marginBottom: '24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                }}>
+                <div className="error-banner">
                     <AlertCircle size={20} color="#dc2626" />
-                    <span style={{ color: '#991b1b', fontWeight: '600' }}>{error}</span>
+                    <span>{error}</span>
                 </div>
             )}
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { X, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 import '../styles/Client-signup.css';
 
 const SignUp = () => {
@@ -101,9 +101,12 @@ const SignUp = () => {
     
             const data = await response.json();
     
-            if (response.ok) {
-                console.log('Success:', data.mess);
+            if (data.success) {
+                console.log('Success:', data.message);
                 setSignupState("Success!");
+                
+                // Store user info
+                localStorage.setItem('userName', formData.name);
                 
                 // Reset form
                 setFormData({
@@ -118,8 +121,8 @@ const SignUp = () => {
                     navigate('/client-login');
                 }, 1000);
             } else {
-                console.error('Error:', data.mess);
-                setErrors({ general: data.mess || 'Sign up failed. Please try again.' });
+                console.error('Error:', data.message);
+                setErrors({ general: data.message || 'Sign up failed. Please try again.' });
                 setSignupState("Sign Up");
                 setIsLoading(false);
             }

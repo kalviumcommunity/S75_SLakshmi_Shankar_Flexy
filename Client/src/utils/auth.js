@@ -9,7 +9,7 @@ export const tokenManager = {
 
   // Set token in both cookies and localStorage
   setToken: (token) => {
-    Cookie.set('token', token, { expires: 0.5 }); // 12 hours
+    Cookie.set('token', token, { expires: 0.5, sameSite: 'None', secure: true }); // 12 hours
     localStorage.setItem('authToken', token);
   },
 
@@ -17,6 +17,8 @@ export const tokenManager = {
   removeToken: () => {
     Cookie.remove('token');
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('expertId');
   },
 
   // Check if user is authenticated
@@ -30,11 +32,12 @@ export const authenticatedFetch = async (url, options = {}) => {
   const token = tokenManager.getToken();
   
   const defaultOptions = {
+    method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
       ...(token && { 'Authorization': `Bearer ${token}` })
     },
-    credentials: 'include', // Still include credentials for cookie support
+    credentials: 'include', // CRITICAL: Required for cookies
     ...options
   };
 
@@ -43,5 +46,34 @@ export const authenticatedFetch = async (url, options = {}) => {
     defaultOptions.headers = { ...defaultOptions.headers, ...options.headers };
   }
 
-  return fetch(url, defaultOptions);
+  try {
+    const response = await fetch(url, defaultOptions);
+    
+    // Handle authentication errors
+    if (response.status === 401 || response.status === 403) {
+      tokenManager.removeToken();
+      window.location.href = '/';
+      throw new Error('Authentication failed. Please login again.');
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+};
+
+// Logout utility
+export const logout = async () => {
+  try {
+    await fetch('https://flexy-backend.onrender.com/api/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+  } finally {
+    tokenManager.removeToken();
+    window.location.href = '/';
+  }
 };
