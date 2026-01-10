@@ -97,7 +97,7 @@ router.post("/expert-login", async (req, res) => {
 });
 
 /* -------------------- GET ALL EXPERTS (CLIENT ONLY) -------------------- */
-router.get("/all-experts", auth, async (req, res) => {
+router.get("/all-experts", async (req, res) => {
   try {
     const experts = await Expert.find().select("-password");
 
