@@ -1,102 +1,77 @@
-// import React, { useEffect, useState } from 'react';
-// import { useParams } from 'react-router-dom';
-// import { io } from 'socket.io-client';
-// import Cookie from 'js-cookie';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { io } from "socket.io-client";
+import Cookie from "js-cookie";
+import "../styles/Chat.css";
 
-// const socket = io('https://flexy-backend.onrender.com');
+const socket = io("https://flexy-backend.onrender.com", {
+  withCredentials: true
+});
 
-// const ChatRoom = () => {
-//     const { expertId } = useParams();
-//     const clientId = Cookie.get('id');
-//     const userName = Cookie.get('name');
-//     const roomId = `${clientId}-${expertId}`;
+const Chat = () => {
+  const { expertId } = useParams();
+  const clientId = Cookie.get("id");
+  const userName = Cookie.get("name");
 
-//     const [message, setMessage] = useState('');
-//     const [chatLog, setChatLog] = useState([]);
+  const roomId =
+    clientId < expertId
+      ? `${clientId}-${expertId}`
+      : `${expertId}-${clientId}`;
 
-//     useEffect(() => {
-//         socket.emit('join_room', roomId);
-//         console.log(expertId)
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
 
-//         // Load previous messages
-//         fetch(`https://flexy-backend.onrender.com/api/chat/${clientId}/${expertId}`, {
-//             credentials: 'include'
-//         })
-//             .then(res => res.json())
-//             .then(data => {
-//                 if (data.success) {
-//                     setChatLog(data.messages);
-//                 }
-//             });
+  useEffect(() => {
+    socket.emit("join-room", roomId);
 
-//         socket.on('receive_message', (data) => {
-//             setChatLog((prev) => [...prev, {
-//                 sender: 'expert',
-//                 message: data.message,
-//                 timestamp: new Date()
-//             }]);
-//         });
+    socket.on("receive-message", (data) => {
+      setMessages((prev) => [...prev, data]);
+    });
 
-//         return () => {
-//             socket.off('receive_message');
-//         };
-//     }, [roomId, clientId, expertId]);
+    return () => {
+      socket.off("receive-message");
+    };
+  }, [roomId]);
 
-//     const handleSendMessage = async () => {
-//         if (message.trim() === '') return;
+  const sendMessage = () => {
+    if (!message.trim()) return;
 
-//         const msgData = {
-//             room: roomId,
-//             message
-//         };
+    socket.emit("send-message", {
+      roomId,
+      message,
+      sender: userName
+    });
 
-//         socket.emit('send_message', msgData);
+    setMessage("");
+  };
 
-//         const newMessage = {
-//             client: clientId,
-//             expert: expertId,
-//             sender: 'client',
-//             message
-//         };
+  return (
+    <div className="chat-container">
+      <div className="chat-messages">
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={
+              msg.sender === userName ? "my-message" : "their-message"
+            }
+          >
+            <strong>{msg.sender}</strong>
+            <p>{msg.message}</p>
+            <span>{msg.time}</span>
+          </div>
+        ))}
+      </div>
 
-//         // Save to DB
-//         await fetch('https://flexy-backend.onrender.com/api/chat', {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             credentials: 'include',
-//             body: JSON.stringify(newMessage)
-//         });
+      <div className="chat-input">
+        <input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button onClick={sendMessage}>Send</button>
+      </div>
+    </div>
+  );
+};
 
-//         setChatLog((prev) => [...prev, {
-//             sender: 'client',
-//             message,
-//             timestamp: new Date()
-//         }]);
-
-//         setMessage('');
-//     };
-
-//     return (
-//         <div className="chat-room-container">
-//             <h2>Chat with Expert</h2>
-//             <div className="chat-log">
-//                 {chatLog.map((msg, idx) => (
-//                     <div key={idx} className={msg.sender === 'client' ? 'client-msg' : 'expert-msg'}>
-//                         <strong>{msg.sender === 'client' ? userName : 'Expert'}:</strong> {msg.message}
-//                     </div>
-//                 ))}
-//             </div>
-//             <div className="chat-input">
-//                 <input
-//                     type="text"
-//                     value={message}
-//                     onChange={(e) => setMessage(e.target.value)}
-//                     placeholder="Type a message..."
-//                 />
-//                 <button onClick={handleSendMessage}>Send</button>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default ChatRoom;
+export default Chat;

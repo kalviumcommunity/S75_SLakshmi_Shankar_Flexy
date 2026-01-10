@@ -31,31 +31,32 @@ const ClientHome = () => {
     };
 
     const getExperts = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            
-            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/all-experts', {
-                method: "GET"
-            });
+  try {
+    setLoading(true);
+    setError(null);
 
-            if (response.ok) {
-                const data = await response.json();
-                setAllExperts(data.users);
-                setSearch("");
-                setLocation("");
-                setSearchActive(false);
-            } else {
-                const data = await response.json();
-                setError(data.message || 'Failed to fetch experts');
-            }
-        } catch (err) {
-            console.error('Error fetching experts:', err);
-            setError('Network error. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const response = await authenticatedFetch(
+      'https://flexy-backend.onrender.com/api/all-experts',
+      { method: "GET" }
+    );
+
+    // backend sends: { experts: [...] }
+    const data = await response.json();
+    console.log(data)
+    setAllExperts(data.experts || []);
+    setSearch("");
+    setLocation("");
+    setSearchActive(false);
+
+  } catch (err) {
+    console.error('Error fetching experts:', err);
+    setError(err.message || 'Failed to fetch experts');
+    setAllExperts([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     const getByLocation = async () => {
         if (!locationSet.trim()) {
