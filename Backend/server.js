@@ -33,6 +33,7 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [
       "https://flexyfrontend.netlify.app",
       "https://flexy-life.netlify.app",
+      "http://localhost:5173",
       process.env.FRONTEND_URL
     ].filter(Boolean)
   : [
