@@ -3,187 +3,282 @@ const router = express.Router();
 const Booking = require('../Schema/Booking-schema');
 const Client = require('../Schema/Client-schema');
 const Expert = require('../Schema/Expert-schema');
-const Auth = require('../middleware/auth');
+const auth = require('../middleware/auth');
 
-// Create a new booking request
-router.post('/create-booking', Auth, async (req, res) => {
-    try {
-        const { expertId, message } = req.body;
-        const userIdentifier = req.user.id;
+// Input validation helper
+const isValidObjectId = (id) => {
+  return /^[0-9a-fA-F]{24}$/.test(id);
+};
 
-        console.log('Booking request data:', { expertId, message, userIdentifier, userObj: req.user });
+/* -------------------- CREATE BOOKING -------------------- */
+router.post('/create-booking', auth, async (req, res) => {
+  try {
+    const { expertId, message } = req.body;
+    const userIdentifier = req.user.id;
 
-        if (!userIdentifier) {
-            return res.status(400).json({ message: 'User ID not found in token' });
-        }
+    console.log('Booking request data:', { expertId, message, userIdentifier, role: req.user.role });
 
-        if (!expertId) {
-            return res.status(400).json({ message: 'Expert ID is required' });
-        }
-
-        // Get client and expert details - find by phone for client, _id for expert
-        const client = await Client.findOne({ phone: userIdentifier });
-        const expert = await Expert.findById(expertId);
-
-        if (!client) {
-            return res.status(404).json({ message: 'Client not found' });
-        }
-
-        if (!expert) {
-            return res.status(404).json({ message: 'Expert not found' });
-        }
-
-        // Allow multiple bookings - remove duplicate prevention
-        // Clients can send multiple requests to the same expert if needed
-
-        const newBooking = new Booking({
-            clientId: client._id,
-            expertId,
-            clientName: client.name,
-            clientPhone: client.phone.toString(),
-            expertName: expert.name,
-            expertProfession: expert.profession,
-            message: message || ''
-        });
-
-        await newBooking.save();
-
-        res.status(201).json({
-            message: 'Booking request sent successfully',
-            booking: newBooking
-        });
-
-    } catch (error) {
-        console.error('Error creating booking:', error);
-        console.error('Error stack:', error.stack);
-        res.status(500).json({ 
-            message: 'Internal server error',
-            error: error.message,
-            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
+    // Verify user is a client
+    if (req.user.role !== 'client') {
+      return res.status(403).json({ 
+        message: 'Only clients can create bookings',
+        success: false 
+      });
     }
+
+    if (!userIdentifier) {
+      return res.status(400).json({ 
+        message: 'User ID not found in token',
+        success: false 
+      });
+    }
+
+    if (!expertId) {
+      return res.status(400).json({ 
+        message: 'Expert ID is required',
+        success: false 
+      });
+    }
+
+    if (!isValidObjectId(expertId)) {
+      return res.status(400).json({ 
+        message: 'Invalid expert ID format',
+        success: false 
+      });
+    }
+
+    // Get client by phone (stored as 'id' in JWT)
+    const client = await Client.findOne({ phone: userIdentifier });
+    if (!client) {
+      return res.status(404).json({ 
+        message: 'Client not found',
+        success: false 
+      });
+    }
+
+    // Get expert by _id
+    const expert = await Expert.findById(expertId);
+    if (!expert) {
+      return res.status(404).json({ 
+        message: 'Expert not found',
+        success: false 
+      });
+    }
+
+    // Create booking
+    const newBooking = new Booking({
+      clientId: client._id,
+      expertId,
+      clientName: client.name,
+      clientPhone: client.phone.toString(),
+      expertName: expert.name,
+      expertProfession: expert.profession,
+      message: message || '',
+      status: 'pending'
+    });
+
+    await newBooking.save();
+
+    res.status(201).json({
+      message: 'Booking request sent successfully',
+      booking: newBooking,
+      success: true
+    });
+
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Server error',
+      success: false
+    });
+  }
 });
 
-router.get('/testforbooking', async(req, res) => {
+/* -------------------- GET ALL BOOKINGS (DEV ONLY) -------------------- */
+if (process.env.NODE_ENV !== 'production') {
+  router.get('/testforbooking', async (req, res) => {
     try {
-        const allData = await Booking.find();
-        return res.status(200).json({
-            DATA: allData
-        })
-    } catch(err) {
-        return res.status(500).json({
-            message: err.message
-        })
+      const allData = await Booking.find();
+      return res.status(200).json({
+        DATA: allData,
+        success: true
+      });
+    } catch (err) {
+      return res.status(500).json({
+        message: err.message,
+        success: false
+      });
     }
-})
+  });
+}
 
-// Get all bookings for an expert
-router.get('/expert-bookings', Auth, async (req, res) => {
-    try {
-        const expertContact = req.user.id;
+/* -------------------- GET EXPERT BOOKINGS -------------------- */
+router.get('/expert-bookings', auth, async (req, res) => {
+  try {
+    const expertContact = req.user.id;
 
-        // Find expert by contact field (JWT uses contact as id)
-        // Try both string and number formats to handle data type mismatches
-        const expert = await Expert.findOne({ 
-            $or: [
-                { contact: expertContact },
-                { contact: expertContact.toString() },
-                { contact: parseInt(expertContact) }
-            ]
-        });
-        
-        if (!expert) {
-            return res.status(404).json({ 
-                message: 'Expert not found',
-                searchedContact: expertContact
-            });
-        }
-
-        const bookings = await Booking.find({ expertId: expert._id })
-            .sort({ createdAt: -1 })
-            .populate('clientId', 'name phone');
-
-        res.status(200).json({ bookings });
-
-    } catch (error) {
-        console.error('Error fetching expert bookings:', error);
-        res.status(500).json({ message: 'Internal server error' });
+    // Verify user is an expert
+    if (req.user.role !== 'expert') {
+      return res.status(403).json({ 
+        message: 'Only experts can access this endpoint',
+        success: false 
+      });
     }
+
+    // Find expert by contact field (stored as 'id' in JWT)
+    const expert = await Expert.findOne({ contact: expertContact });
+    
+    if (!expert) {
+      return res.status(404).json({ 
+        message: 'Expert not found',
+        searchedContact: expertContact,
+        success: false
+      });
+    }
+
+    // Get all bookings for this expert
+    const bookings = await Booking.find({ expertId: expert._id })
+      .sort({ createdAt: -1 })
+      .populate('clientId', 'name phone');
+
+    res.status(200).json({ 
+      bookings,
+      success: true 
+    });
+
+  } catch (error) {
+    console.error('Error fetching expert bookings:', error);
+    res.status(500).json({ 
+      message: 'Internal server error',
+      success: false 
+    });
+  }
 });
 
-// Get all bookings for a client
-router.get('/client-bookings', Auth, async (req, res) => {
-    try {
-        const clientPhone = req.user.id;
+/* -------------------- GET CLIENT BOOKINGS -------------------- */
+router.get('/client-bookings', auth, async (req, res) => {
+  try {
+    const clientPhone = req.user.id;
 
-        // Find client by phone number (JWT uses phone as id)
-        const client = await Client.findOne({ phone: clientPhone });
-        
-        if (!client) {
-            return res.status(404).json({ 
-                message: 'Client not found',
-                searchedPhone: clientPhone
-            });
-        }
-
-        const bookings = await Booking.find({ clientId: client._id })
-            .sort({ createdAt: -1 })
-            .populate('expertId', 'name profession contact location');
-
-        res.status(200).json({ bookings });
-
-    } catch (error) {
-        console.error('Error fetching client bookings:', error);
-        res.status(500).json({ message: 'Internal server error' });
+    // Verify user is a client
+    if (req.user.role !== 'client') {
+      return res.status(403).json({ 
+        message: 'Only clients can access this endpoint',
+        success: false 
+      });
     }
+
+    // Find client by phone number (stored as 'id' in JWT)
+    const client = await Client.findOne({ phone: clientPhone });
+    
+    if (!client) {
+      return res.status(404).json({ 
+        message: 'Client not found',
+        searchedPhone: clientPhone,
+        success: false
+      });
+    }
+
+    // Get all bookings for this client
+    const bookings = await Booking.find({ clientId: client._id })
+      .sort({ createdAt: -1 })
+      .populate('expertId', 'name profession contact location');
+
+    res.status(200).json({ 
+      bookings,
+      success: true 
+    });
+
+  } catch (error) {
+    console.error('Error fetching client bookings:', error);
+    res.status(500).json({ 
+      message: 'Internal server error',
+      success: false 
+    });
+  }
 });
 
-// Update booking status (accept/decline)
-router.patch('/update-booking-status', Auth, async (req, res) => {
-    try {
-        const { bookingId, status } = req.body;
-        const expertContact = req.user.id;
+/* -------------------- UPDATE BOOKING STATUS -------------------- */
+router.patch('/update-booking-status', auth, async (req, res) => {
+  try {
+    const { bookingId, status } = req.body;
+    const expertContact = req.user.id;
 
-        if (!['accepted', 'declined'].includes(status)) {
-            return res.status(400).json({ message: 'Invalid status. Must be "accepted" or "declined"' });
-        }
-
-        // Find expert by contact field - handle data type mismatches
-        const expert = await Expert.findOne({ 
-            $or: [
-                { contact: expertContact },
-                { contact: expertContact.toString() },
-                { contact: parseInt(expertContact) }
-            ]
-        });
-        
-        if (!expert) {
-            return res.status(404).json({ message: 'Expert not found' });
-        }
-
-        const booking = await Booking.findOne({ _id: bookingId, expertId: expert._id });
-
-        if (!booking) {
-            return res.status(404).json({ message: 'Booking not found or you are not authorized to update this booking' });
-        }
-
-        if (booking.status !== 'pending') {
-            return res.status(400).json({ message: 'This booking has already been processed' });
-        }
-
-        booking.status = status;
-        booking.updatedAt = new Date();
-        await booking.save();
-
-        res.status(200).json({
-            message: `Booking ${status} successfully`,
-            booking
-        });
-
-    } catch (error) {
-        console.error('Error updating booking status:', error);
-        res.status(500).json({ message: 'Internal server error' });
+    // Verify user is an expert
+    if (req.user.role !== 'expert') {
+      return res.status(403).json({ 
+        message: 'Only experts can update booking status',
+        success: false 
+      });
     }
+
+    // Validate status
+    if (!['accepted', 'declined'].includes(status)) {
+      return res.status(400).json({ 
+        message: 'Invalid status. Must be "accepted" or "declined"',
+        success: false 
+      });
+    }
+
+    // Validate booking ID
+    if (!isValidObjectId(bookingId)) {
+      return res.status(400).json({ 
+        message: 'Invalid booking ID format',
+        success: false 
+      });
+    }
+
+    // Find expert by contact field
+    const expert = await Expert.findOne({ contact: expertContact });
+    
+    if (!expert) {
+      return res.status(404).json({ 
+        message: 'Expert not found',
+        success: false 
+      });
+    }
+
+    // Find booking
+    const booking = await Booking.findOne({ 
+      _id: bookingId, 
+      expertId: expert._id 
+    });
+
+    if (!booking) {
+      return res.status(404).json({ 
+        message: 'Booking not found or you are not authorized to update this booking',
+        success: false 
+      });
+    }
+
+    // Check if already processed
+    if (booking.status !== 'pending') {
+      return res.status(400).json({ 
+        message: `This booking has already been ${booking.status}`,
+        success: false 
+      });
+    }
+
+    // Update booking
+    booking.status = status;
+    booking.updatedAt = new Date();
+    await booking.save();
+
+    res.status(200).json({
+      message: `Booking ${status} successfully`,
+      booking,
+      success: true
+    });
+
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    res.status(500).json({ 
+      message: 'Internal server error',
+      success: false 
+    });
+  }
 });
 
 module.exports = router;
