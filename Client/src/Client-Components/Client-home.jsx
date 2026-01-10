@@ -253,7 +253,7 @@ const ClientHome = () => {
                                 </button>
                                 <button 
                                     className='chat-btn' 
-                                    onClick={() => handleChat(expert._id)}
+                                    onClick={() => navigate(`/chat/${expert._id}`)}
                                     aria-label={`Chat with ${expert.name}`}
                                 >
                                     Chat
