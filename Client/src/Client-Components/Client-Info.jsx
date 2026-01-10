@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { X, Star, MapPin, Phone, Briefcase, Calendar, AlertCircle } from 'lucide-react';
+import { X, MapPin, Phone, Briefcase, Calendar, AlertCircle } from 'lucide-react';
 import Profile from "../assests/profile.png";
 import { authenticatedFetch } from '../utils/auth';
 
@@ -21,16 +21,17 @@ const ExpertInfoPage = () => {
             setLoading(true);
             setError(null);
 
-            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/get-by-id', {
-                method: 'POST',
-                body: JSON.stringify({ _id: id })
-            });
+            // Use the correct endpoint: GET /api/expert/:id
+            const response = await authenticatedFetch(
+                `https://flexy-backend.onrender.com/api/expert/${id}`,
+                { method: 'GET' }
+            );
 
             const data = await response.json();
             
-            if (response.ok) {
-                setInfo(data);
-                fetchPexelsImages(data.profession);
+            if (data.success) {
+                setInfo(data.expert);
+                fetchPexelsImages(data.expert.profession);
             } else {
                 setError(data.message || 'Failed to load expert information');
             }
@@ -86,17 +87,20 @@ const ExpertInfoPage = () => {
         
         setIsHiring(true);
         try {
-            const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/create-booking', {
-                method: 'POST',
-                body: JSON.stringify({
-                    expertId: id,
-                    message: hireMessage
-                })
-            });
+            const response = await authenticatedFetch(
+                'https://flexy-backend.onrender.com/api/create-booking',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        expertId: id,
+                        message: hireMessage
+                    })
+                }
+            );
 
             const data = await response.json();
             
-            if (response.ok) {
+            if (data.success) {
                 alert(`Booking request sent successfully! ${info.name} will review your request and get back to you.`);
                 setShowHireModal(false);
                 setHireMessage('');
@@ -277,7 +281,7 @@ const ExpertInfoPage = () => {
                     <div className="hire-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>Hire {info?.name}</h3>
-                            <X size={24} onClick={closeHireModal} />
+                            <X size={24} onClick={closeHireModal} style={{ cursor: 'pointer' }} />
                         </div>
                         <div className="modal-body">
                             <p>

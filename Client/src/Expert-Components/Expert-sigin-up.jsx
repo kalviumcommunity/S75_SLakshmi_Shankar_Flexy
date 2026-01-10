@@ -1,11 +1,8 @@
-// ============================================
-// IMPROVED EXPERT SIGN UP COMPONENT
-// ============================================
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Expert-signup.css';
 import { X, AlertCircle } from 'lucide-react';
+import { tokenManager } from '../utils/auth';
 
 const ExpertSignUp = () => {
   const [step, setStep] = useState(1); // 1 or 2
@@ -118,15 +115,26 @@ const ExpertSignUp = () => {
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
               body: JSON.stringify(payload),
             }
           );
 
-          const result = await response.json();
+              if (result.success) {
+                tokenManager.setToken(result.token);
+                navigate("/expert-home");
+              }
 
-          if (response.ok) {
+
+          if (result.success) {
             console.log('Sign up successful:', result);
             localStorage.setItem('expertId', result.expertId);
+            localStorage.setItem('expertContact', result.expertContact);
+            
+            // Store token if provided
+            if (result.token) {
+              tokenManager.setToken(result.token);
+            }
             
             // Show success briefly before navigating
             setTimeout(() => {
