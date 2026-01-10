@@ -11,6 +11,7 @@ import ExpertSiginUp from './Expert-Components/Expert-sigin-up';
 import ExpertHome from './Expert-Components/Expert-home';
 import ExpertLogin from './Expert-Components/Expert-login';
 import ClientInfo from './Client-Components/Client-Info';
+import Chat from './Client-Components/Chat';
 // import Chat from './Client-Components/Chat';
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
         <Route path='/client-home' element={<ClientHome />} />
         <Route path='/expert/:id' element={<ClientInfo />} />
         {/* <Route path='/chat/:expertId' element={<Chat />} /> */}
+        <Route path="/chat/:expertId" element={<Chat />} />
 
         <Route path='/expert-sign-up' element={<ExpertSiginUp />} />
         <Route path='/expert-login' element={<ExpertLogin />} />

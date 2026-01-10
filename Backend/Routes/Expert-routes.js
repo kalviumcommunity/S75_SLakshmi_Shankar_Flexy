@@ -96,6 +96,18 @@ router.post("/expert-login", async (req, res) => {
   }
 });
 
+// GET LOGGED-IN EXPERT
+router.get("/expert/me", auth, async (req, res) => {
+  try {
+    const expert = await Expert.findById(req.user.id).select("-password");
+    if (!expert) return res.status(404).json({ message: "Expert not found" });
+    res.json({ expert });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 /* -------------------- GET ALL EXPERTS (CLIENT ONLY) -------------------- */
 router.get("/all-experts", async (req, res) => {
   try {

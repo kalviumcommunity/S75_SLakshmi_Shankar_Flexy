@@ -1,11 +1,18 @@
 // ============================================
-// IMPROVED EXPERT HOME COMPONENT
+// FIXED + CLEAN EXPERT HOME COMPONENT
 // ============================================
 
 import React, { useEffect, useState } from "react";
 import "../styles/ExpertsHome.css";
-import { authenticatedFetch } from '../utils/auth';
-import { User, Phone, Briefcase, Calendar, MessageSquare, AlertCircle } from 'lucide-react';
+import { authenticatedFetch } from "../utils/auth";
+import {
+  User,
+  Phone,
+  Briefcase,
+  Calendar,
+  MessageSquare,
+  AlertCircle,
+} from "lucide-react";
 
 const ExpertHome = () => {
   const [user, setUser] = useState(null);
@@ -14,139 +21,101 @@ const ExpertHome = () => {
   const [processingBooking, setProcessingBooking] = useState(null);
   const [error, setError] = useState(null);
 
-  const getUser = async () => {
-    try {
-      const expertId = localStorage.getItem('expertId');
-      
-      if (!expertId) {
-        setError('Expert ID not found. Please log in again.');
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(
-        "https://flexy-backend.onrender.com/api/get-by-id",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ _id: expertId }),
-          credentials: 'include'
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      } else {
-        console.error("Failed to fetch expert:", response);
-        setError('Failed to load profile information');
-      }
-    } catch (err) {
-      console.error('Error fetching user:', err);
-      setError('Network error. Please try again.');
-    }
+  // -----------------------------
+  // FETCH LOGGED-IN EXPERT
+  // -----------------------------
+  const fetchExpert = async () => {
+    const data = await authenticatedFetch("/api/expert/me", {
+      method: "GET",
+    });
+    setUser(data.expert);
   };
 
+  // -----------------------------
+  // FETCH BOOKINGS
+  // -----------------------------
   const fetchBookings = async () => {
+    const data = await authenticatedFetch("/api/expert-bookings", {
+      method: "GET",
+    });
+    setBookings(data.bookings || []);
+  };
+
+  // -----------------------------
+  // INIT LOAD
+  // -----------------------------
+  const init = async () => {
     try {
-      const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/expert-bookings');
-      const data = await response.json();
-      
-      if (response.ok) {
-        setBookings(data.bookings || []);
-      } else {
-        console.error('Failed to fetch bookings:', data.message);
-      }
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
+      setLoading(true);
+      setError(null);
+
+      await Promise.all([fetchExpert(), fetchBookings()]);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to load expert dashboard");
     } finally {
       setLoading(false);
     }
   };
 
+  // -----------------------------
+  // BOOKING ACTION
+  // -----------------------------
   const handleBookingAction = async (bookingId, status) => {
     if (processingBooking === bookingId) return;
-    
+
     setProcessingBooking(bookingId);
-    
+
     try {
-      const response = await authenticatedFetch('https://flexy-backend.onrender.com/api/update-booking-status', {
-        method: 'PATCH',
-        body: JSON.stringify({
-          bookingId,
-          status
-        })
+      await authenticatedFetch("/api/update-booking-status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId, status }),
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Update booking in local state
-        setBookings(prevBookings =>
-          prevBookings.map(booking =>
-            booking._id === bookingId
-              ? { ...booking, status, updatedAt: new Date().toISOString() }
-              : booking
-          )
-        );
-        
-        // Refresh bookings list
-        await fetchBookings();
-        
-        alert(`Booking ${status === 'accepted' ? 'accepted' : 'declined'} successfully!`);
-        
-        // Notify other components
-        window.dispatchEvent(new CustomEvent('bookingStatusChanged', { 
-          detail: { bookingId, status } 
-        }));
-      } else {
-        alert(data.message || `Failed to ${status} booking`);
-      }
-    } catch (error) {
-      console.error(`Error ${status}ing booking:`, error);
-      alert(`Network error. Failed to ${status} booking.`);
+      setBookings((prev) =>
+        prev.map((b) =>
+          b._id === bookingId
+            ? { ...b, status, updatedAt: new Date().toISOString() }
+            : b
+        )
+      );
+
+      await fetchBookings();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to update booking");
     } finally {
       setProcessingBooking(null);
     }
   };
 
+  // -----------------------------
+  // EFFECTS
+  // -----------------------------
   useEffect(() => {
-    getUser();
-    fetchBookings();
+    init();
 
-    // Listen for new booking events
-    const handleBookingCreated = () => {
-      fetchBookings();
-    };
+    const refresh = () => fetchBookings();
+    window.addEventListener("bookingCreated", refresh);
 
-    window.addEventListener('bookingCreated', handleBookingCreated);
-
-    return () => {
-      window.removeEventListener('bookingCreated', handleBookingCreated);
-    };
+    return () => window.removeEventListener("bookingCreated", refresh);
   }, []);
 
-  const pendingBookings = bookings.filter(booking => booking.status === 'pending');
+  const pendingBookings = bookings.filter(
+    (booking) => booking.status === "pending"
+  );
 
+  // -----------------------------
+  // ERROR UI
+  // -----------------------------
   if (error) {
     return (
       <div className="expert-home">
-        <div className="profile-card" style={{ textAlign: 'center', padding: '60px 40px' }}>
-          <AlertCircle size={48} color="#dc2626" style={{ margin: '0 auto 20px' }} />
-          <h3 style={{ color: '#dc2626', marginBottom: '12px', fontSize: '20px' }}>{error}</h3>
-          <button 
-            onClick={() => window.location.href = '/expert-login'}
-            style={{
-              marginTop: '24px',
-              padding: '12px 32px',
-              background: '#f97316',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
+        <div className="profile-card" style={{ textAlign: "center" }}>
+          <AlertCircle size={48} color="#dc2626" />
+          <h3 style={{ color: "#dc2626" }}>{error}</h3>
+          <button onClick={() => (window.location.href = "/expert-login")}>
             Go to Login
           </button>
         </div>
@@ -154,57 +123,45 @@ const ExpertHome = () => {
     );
   }
 
+  // -----------------------------
+  // MAIN UI
+  // -----------------------------
   return (
     <div className="expert-home">
       <div className="profile-card">
-        {/* Profile Section */}
         <div className="profile-details">
           <p>
-            <strong><User size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />Name:</strong> 
-            {user?.name || 'Loading...'}
+            <User size={18} /> <strong>Name:</strong> {user?.name}
           </p>
           <p>
-            <strong><Phone size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />Contact:</strong> 
-            {user?.contact || 'Loading...'}
+            <Phone size={18} /> <strong>Contact:</strong> {user?.contact}
           </p>
           <p>
-            <strong><Briefcase size={18} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />Profession:</strong> 
-            {user?.profession || 'Loading...'}
+            <Briefcase size={18} /> <strong>Profession:</strong>{" "}
+            {user?.profession}
           </p>
         </div>
 
-        {/* Bookings Section */}
         <div className="booking-card">
           <h4>
-            <MessageSquare size={24} style={{ display: 'inline', marginRight: '12px', verticalAlign: 'middle' }} />
-            Pending Booking Requests
+            <MessageSquare size={22} /> Pending Requests
             {pendingBookings.length > 0 && (
-              <span style={{ 
-                marginLeft: '12px', 
-                background: '#f97316', 
-                color: 'white', 
-                padding: '4px 12px', 
-                borderRadius: '12px', 
-                fontSize: '14px',
-                fontWeight: '700'
-              }}>
-                {pendingBookings.length}
-              </span>
+              <span className="badge">{pendingBookings.length}</span>
             )}
           </h4>
 
           {loading ? (
-            <p>Loading booking requests...</p>
+            <p>Loading bookings...</p>
           ) : pendingBookings.length === 0 ? (
-            <p>No pending booking requests at the moment.</p>
+            <p>No pending booking requests.</p>
           ) : (
             pendingBookings.map((booking) => (
               <div key={booking._id} className="booking-item">
                 <p>
-                  <strong>Client Name:</strong> {booking.clientName}
+                  <strong>Client:</strong> {booking.clientName}
                 </p>
                 <p>
-                  <strong>Phone Number:</strong> {booking.clientPhone}
+                  <strong>Phone:</strong> {booking.clientPhone}
                 </p>
                 {booking.message && (
                   <p>
@@ -212,28 +169,28 @@ const ExpertHome = () => {
                   </p>
                 )}
                 <p>
-                  <strong><Calendar size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
-                  Requested:</strong> {new Date(booking.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  <Calendar size={16} />{" "}
+                  {new Date(booking.createdAt).toLocaleDateString()}
                 </p>
-                
+
                 <div className="buttons">
-                  <button 
+                  <button
                     className="accept"
-                    onClick={() => handleBookingAction(booking._id, 'accepted')}
                     disabled={processingBooking === booking._id}
+                    onClick={() =>
+                      handleBookingAction(booking._id, "accepted")
+                    }
                   >
-                    {processingBooking === booking._id ? 'Processing...' : 'Accept'}
+                    Accept
                   </button>
-                  <button 
+                  <button
                     className="decline"
-                    onClick={() => handleBookingAction(booking._id, 'declined')}
                     disabled={processingBooking === booking._id}
+                    onClick={() =>
+                      handleBookingAction(booking._id, "declined")
+                    }
                   >
-                    {processingBooking === booking._id ? 'Processing...' : 'Decline'}
+                    Decline
                   </button>
                 </div>
               </div>
@@ -246,4 +203,3 @@ const ExpertHome = () => {
 };
 
 export default ExpertHome;
-
