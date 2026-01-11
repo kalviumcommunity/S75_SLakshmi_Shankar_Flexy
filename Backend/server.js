@@ -28,6 +28,9 @@ const chatRoute = require("./Routes/Chat-routes");
 const app = express();
 const server = http.createServer(app);
 
+// ✅ ADD THIS LINE - Trust proxy for Render
+app.set('trust proxy', 1);
+
 // Allowed origins configuration
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [
@@ -117,9 +120,9 @@ app.use("/api/client-signup", authLimiter);
 app.use("/api/expert-login", authLimiter);
 app.use("/api/expert-sign-up", authLimiter);
 
-// Route handlers
-app.use("/api", userRoute);
-app.use("/api", expertRoute);
+// Route handlers - ORDER MATTERS!
+app.use("/api", expertRoute);   // ✅ More specific routes first (/expert/me)
+app.use("/api", userRoute);     // ✅ Less specific routes second (/expert/:id)
 app.use("/api", bookingRoute);
 app.use("/api", chatRoute);
 
