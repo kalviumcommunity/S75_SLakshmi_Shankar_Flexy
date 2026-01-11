@@ -5,12 +5,10 @@ const Client = require('../Schema/Client-schema');
 const Expert = require('../Schema/Expert-schema');
 const auth = require('../middleware/auth');
 
-// Input validation helper
 const isValidObjectId = (id) => {
   return /^[0-9a-fA-F]{24}$/.test(id);
 };
 
-/* -------------------- CREATE BOOKING -------------------- */
 router.post('/create-booking', auth, async (req, res) => {
   try {
     const { expertId, message } = req.body;
@@ -18,7 +16,6 @@ router.post('/create-booking', auth, async (req, res) => {
 
     console.log('Booking request data:', { expertId, message, userIdentifier, role: req.user.role });
 
-    // Verify user is a client
     if (req.user.role !== 'client') {
       return res.status(403).json({ 
         message: 'Only clients can create bookings',
@@ -47,7 +44,6 @@ router.post('/create-booking', auth, async (req, res) => {
       });
     }
 
-    // Get client by phone (stored as 'id' in JWT)
     const client = await Client.findOne({ phone: userIdentifier });
     if (!client) {
       return res.status(404).json({ 
@@ -56,7 +52,6 @@ router.post('/create-booking', auth, async (req, res) => {
       });
     }
 
-    // Get expert by _id
     const expert = await Expert.findById(expertId);
     if (!expert) {
       return res.status(404).json({ 
@@ -65,7 +60,6 @@ router.post('/create-booking', auth, async (req, res) => {
       });
     }
 
-    // Create booking
     const newBooking = new Booking({
       clientId: client._id,
       expertId,
@@ -78,6 +72,16 @@ router.post('/create-booking', auth, async (req, res) => {
     });
 
     await newBooking.save();
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(expert.contact.toString()).emit('new-booking', {
+        booking: newBooking,
+        message: `New booking request from ${client.name}`
+      });
+      
+      console.log(`✅ Socket event emitted to expert room: ${expert.contact}`);
+    }
 
     res.status(201).json({
       message: 'Booking request sent successfully',
@@ -96,7 +100,6 @@ router.post('/create-booking', auth, async (req, res) => {
   }
 });
 
-/* -------------------- GET ALL BOOKINGS (DEV ONLY) -------------------- */
 if (process.env.NODE_ENV !== 'production') {
   router.get('/testforbooking', async (req, res) => {
     try {
@@ -114,12 +117,10 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-/* -------------------- GET EXPERT BOOKINGS -------------------- */
 router.get('/expert-bookings', auth, async (req, res) => {
   try {
     const expertContact = req.user.id;
 
-    // Verify user is an expert
     if (req.user.role !== 'expert') {
       return res.status(403).json({ 
         message: 'Only experts can access this endpoint',
@@ -127,7 +128,6 @@ router.get('/expert-bookings', auth, async (req, res) => {
       });
     }
 
-    // Find expert by contact field (stored as 'id' in JWT)
     const expert = await Expert.findOne({ contact: expertContact });
     
     if (!expert) {
@@ -138,7 +138,6 @@ router.get('/expert-bookings', auth, async (req, res) => {
       });
     }
 
-    // Get all bookings for this expert
     const bookings = await Booking.find({ expertId: expert._id })
       .sort({ createdAt: -1 })
       .populate('clientId', 'name phone');
@@ -157,12 +156,10 @@ router.get('/expert-bookings', auth, async (req, res) => {
   }
 });
 
-/* -------------------- GET CLIENT BOOKINGS -------------------- */
 router.get('/client-bookings', auth, async (req, res) => {
   try {
     const clientPhone = req.user.id;
 
-    // Verify user is a client
     if (req.user.role !== 'client') {
       return res.status(403).json({ 
         message: 'Only clients can access this endpoint',
@@ -170,7 +167,6 @@ router.get('/client-bookings', auth, async (req, res) => {
       });
     }
 
-    // Find client by phone number (stored as 'id' in JWT)
     const client = await Client.findOne({ phone: clientPhone });
     
     if (!client) {
@@ -181,7 +177,6 @@ router.get('/client-bookings', auth, async (req, res) => {
       });
     }
 
-    // Get all bookings for this client
     const bookings = await Booking.find({ clientId: client._id })
       .sort({ createdAt: -1 })
       .populate('expertId', 'name profession contact location');
@@ -200,13 +195,11 @@ router.get('/client-bookings', auth, async (req, res) => {
   }
 });
 
-/* -------------------- UPDATE BOOKING STATUS -------------------- */
 router.patch('/update-booking-status', auth, async (req, res) => {
   try {
     const { bookingId, status } = req.body;
     const expertContact = req.user.id;
 
-    // Verify user is an expert
     if (req.user.role !== 'expert') {
       return res.status(403).json({ 
         message: 'Only experts can update booking status',
@@ -214,7 +207,6 @@ router.patch('/update-booking-status', auth, async (req, res) => {
       });
     }
 
-    // Validate status
     if (!['accepted', 'declined'].includes(status)) {
       return res.status(400).json({ 
         message: 'Invalid status. Must be "accepted" or "declined"',
@@ -222,7 +214,6 @@ router.patch('/update-booking-status', auth, async (req, res) => {
       });
     }
 
-    // Validate booking ID
     if (!isValidObjectId(bookingId)) {
       return res.status(400).json({ 
         message: 'Invalid booking ID format',
@@ -230,7 +221,6 @@ router.patch('/update-booking-status', auth, async (req, res) => {
       });
     }
 
-    // Find expert by contact field
     const expert = await Expert.findOne({ contact: expertContact });
     
     if (!expert) {
@@ -240,11 +230,10 @@ router.patch('/update-booking-status', auth, async (req, res) => {
       });
     }
 
-    // Find booking
     const booking = await Booking.findOne({ 
       _id: bookingId, 
       expertId: expert._id 
-    });
+    }).populate('clientId', 'phone');
 
     if (!booking) {
       return res.status(404).json({ 
@@ -253,7 +242,6 @@ router.patch('/update-booking-status', auth, async (req, res) => {
       });
     }
 
-    // Check if already processed
     if (booking.status !== 'pending') {
       return res.status(400).json({ 
         message: `This booking has already been ${booking.status}`,
@@ -261,10 +249,22 @@ router.patch('/update-booking-status', auth, async (req, res) => {
       });
     }
 
-    // Update booking
     booking.status = status;
     booking.updatedAt = new Date();
     await booking.save();
+
+    const io = req.app.get('io');
+    if (io && booking.clientId) {
+      const clientPhone = booking.clientId.phone || booking.clientPhone;
+      io.to(clientPhone.toString()).emit('booking-status-update', {
+        bookingId: booking._id,
+        status,
+        expertName: expert.name,
+        message: `Your booking has been ${status} by ${expert.name}`
+      });
+      
+      console.log(`✅ Socket event emitted to client room: ${clientPhone}`);
+    }
 
     res.status(200).json({
       message: `Booking ${status} successfully`,
