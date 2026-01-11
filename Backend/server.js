@@ -10,7 +10,6 @@ const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
-// Validate critical environment variables
 const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'NODE_ENV'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
@@ -19,7 +18,6 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
-// Import routes
 const userRoute = require("./Routes/Client-routes");
 const expertRoute = require("./Routes/Expert-routes");
 const bookingRoute = require("./Routes/Booking-routes");
@@ -28,10 +26,8 @@ const chatRoute = require("./Routes/Chat-routes");
 const app = express();
 const server = http.createServer(app);
 
-// ✅ ADD THIS LINE - Trust proxy for Render
 app.set('trust proxy', 1);
 
-// Allowed origins configuration
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [
       "https://flexyfrontend.netlify.app",
@@ -47,7 +43,6 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
 
 console.log(`🌍 Allowed origins:`, allowedOrigins);
 
-// Socket.IO configuration
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -56,46 +51,37 @@ const io = new Server(server, {
   }
 });
 
-/* ================= SECURITY MIDDLEWARE ================= */
+app.set('io', io);
 
-// Helmet for security headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// Sanitize MongoDB queries
 app.use(mongoSanitize());
 
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // limit each IP
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Apply rate limiting to API routes
 app.use('/api/', limiter);
 
-// Stricter rate limit for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5, // 5 login attempts per 15 minutes
+  max: 5,
   message: 'Too many login attempts, please try again later.',
   skipSuccessfulRequests: true,
 });
-
-/* ================= BASIC MIDDLEWARE ================= */
 
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) === -1) {
@@ -109,46 +95,48 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-/* ================= ROUTES ================= */
-
-// Apply auth rate limiter to login/signup routes
 app.use("/api/client-login", authLimiter);
 app.use("/api/client-signup", authLimiter);
 app.use("/api/expert-login", authLimiter);
 app.use("/api/expert-sign-up", authLimiter);
 
-// Route handlers - ORDER MATTERS!
-app.use("/api", expertRoute);   // ✅ More specific routes first (/expert/me)
-app.use("/api", userRoute);     // ✅ Less specific routes second (/expert/:id)
+app.use("/api", expertRoute);
+app.use("/api", userRoute);
 app.use("/api", bookingRoute);
 app.use("/api", chatRoute);
 
-/* ================= SOCKET.IO ================= */
-
-// Store active connections
 const activeUsers = new Map();
 
 io.on("connection", (socket) => {
   console.log(`✅ User connected: ${socket.id}`);
 
-  // Join room
+  socket.on("join-user-room", (userIdentifier) => {
+    if (!userIdentifier) {
+      socket.emit("error", { message: "User identifier is required" });
+      return;
+    }
+    socket.join(userIdentifier.toString());
+    activeUsers.set(socket.id, { userRoom: userIdentifier.toString() });
+    console.log(`👤 User ${socket.id} joined personal room: ${userIdentifier}`);
+  });
+
   socket.on("join-room", (roomId) => {
     if (!roomId) {
       socket.emit("error", { message: "Room ID is required" });
       return;
     }
     socket.join(roomId);
-    activeUsers.set(socket.id, roomId);
-    console.log(`👤 User ${socket.id} joined room: ${roomId}`);
     
-    // Notify room members
+    const userData = activeUsers.get(socket.id) || {};
+    userData.chatRoom = roomId;
+    activeUsers.set(socket.id, userData);
+    
+    console.log(`👤 User ${socket.id} joined chat room: ${roomId}`);
     socket.to(roomId).emit("user-joined", { socketId: socket.id });
   });
 
-  // Send message
   socket.on("send-message", ({ roomId, message, sender }) => {
     if (!roomId || !message || !sender) {
       socket.emit("error", { message: "Missing required fields" });
@@ -166,7 +154,6 @@ io.on("connection", (socket) => {
     console.log(`💬 Message sent in room ${roomId} by ${sender}`);
   });
 
-  // Handle typing indicator
   socket.on("typing", ({ roomId, sender }) => {
     if (roomId && sender) {
       socket.to(roomId).emit("user-typing", { sender });
@@ -179,22 +166,19 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Disconnect
   socket.on("disconnect", () => {
-    const roomId = activeUsers.get(socket.id);
-    if (roomId) {
-      socket.to(roomId).emit("user-left", { socketId: socket.id });
+    const userData = activeUsers.get(socket.id);
+    if (userData) {
+      if (userData.chatRoom) {
+        socket.to(userData.chatRoom).emit("user-left", { socketId: socket.id });
+      }
       activeUsers.delete(socket.id);
     }
     console.log(`❌ User disconnected: ${socket.id}`);
   });
 });
 
-/* ================= DATABASE ================= */
-
-const mongooseOptions = {
-  // useNewUrlParser and useUnifiedTopology are no longer needed in Mongoose 6+
-};
+const mongooseOptions = {};
 
 mongoose
   .connect(process.env.MONGO_URI, mongooseOptions)
@@ -207,7 +191,6 @@ mongoose
     process.exit(1);
   });
 
-// Handle MongoDB connection errors after initial connection
 mongoose.connection.on('error', err => {
   console.error('❌ MongoDB error:', err);
 });
@@ -215,8 +198,6 @@ mongoose.connection.on('error', err => {
 mongoose.connection.on('disconnected', () => {
   console.warn('⚠️  MongoDB disconnected');
 });
-
-/* ================= HEALTH CHECK ================= */
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -237,9 +218,6 @@ app.get("/health", (req, res) => {
   res.status(200).json(healthCheck);
 });
 
-/* ================= ERROR HANDLING ================= */
-
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ 
     message: "Route not found",
@@ -247,7 +225,6 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err);
   
@@ -257,8 +234,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-/* ================= SERVER START ================= */
-
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
@@ -267,7 +242,6 @@ server.listen(PORT, () => {
   console.log(`⏰ Started at: ${new Date().toLocaleString()}`);
 });
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('👋 SIGTERM received, shutting down gracefully');
   server.close(() => {
