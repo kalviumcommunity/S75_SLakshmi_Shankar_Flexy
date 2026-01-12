@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/ExpertsHome.css";
 import { authenticatedFetch, logout } from "../utils/auth";
+import { useSocket } from "../utils/SocketContext";
 import {
   User,
   Phone,
@@ -9,16 +11,21 @@ import {
   AlertCircle,
   LogOut,
   Calendar,
+  Bell,
+  MessageCircle
 } from "lucide-react";
 
 const ExpertHome = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingBooking, setProcessingBooking] = useState(null);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
+  
+  const { socket, connected } = useSocket();
 
-  // FETCH LOGGED-IN EXPERT
   const fetchExpert = async () => {
     try {
       const response = await authenticatedFetch(
@@ -30,6 +37,8 @@ const ExpertHome = () => {
       
       if (data.success) {
         setUser(data.expert);
+        localStorage.setItem('expertContact', data.expert.contact);
+        localStorage.setItem('expertId', data.expert._id);
       } else {
         throw new Error(data.message || 'Failed to load expert profile');
       }
@@ -39,7 +48,6 @@ const ExpertHome = () => {
     }
   };
 
-  // FETCH BOOKINGS
   const fetchBookings = async () => {
     try {
       const response = await authenticatedFetch(
@@ -56,12 +64,10 @@ const ExpertHome = () => {
       }
     } catch (err) {
       console.error("Error fetching bookings:", err);
-      // Don't throw here, bookings are less critical than profile
       setBookings([]);
     }
   };
 
-  // INIT LOAD
   const init = async () => {
     try {
       setLoading(true);
@@ -76,7 +82,6 @@ const ExpertHome = () => {
     }
   };
 
-  // BOOKING ACTION
   const handleBookingAction = async (bookingId, status) => {
     if (processingBooking === bookingId) return;
 
@@ -94,7 +99,6 @@ const ExpertHome = () => {
       const data = await response.json();
       
       if (data.success) {
-        // Update local state
         setBookings((prev) =>
           prev.map((b) =>
             b._id === bookingId
@@ -103,31 +107,55 @@ const ExpertHome = () => {
           )
         );
         
-        // Refresh bookings from server
-        await fetchBookings();
+        showNotification(`Booking ${status} successfully!`, 'success');
       } else {
-        alert(data.message || `Failed to ${status} booking`);
+        showNotification(data.message || `Failed to ${status} booking`, 'error');
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || "Failed to update booking");
+      showNotification(err.message || "Failed to update booking", 'error');
     } finally {
       setProcessingBooking(null);
     }
   };
 
-  // EFFECTS
+  const handleOpenChat = (clientId) => {
+    navigate(`/expert-chat/${clientId}`);
+  };
+
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  useEffect(() => {
+    if (!socket || !connected) return;
+
+    const handleNewBooking = (data) => {
+      console.log('🔔 New booking received:', data);
+      
+      setBookings((prev) => [data.booking, ...prev]);
+      
+      showNotification(data.message || 'New booking request received!', 'success');
+    };
+
+    socket.on('new-booking', handleNewBooking);
+
+    return () => {
+      socket.off('new-booking', handleNewBooking);
+    };
+  }, [socket, connected]);
+
   useEffect(() => {
     init();
-
-    const refresh = () => fetchBookings();
-    window.addEventListener("bookingCreated", refresh);
-
-    return () => window.removeEventListener("bookingCreated", refresh);
   }, []);
 
   const pendingBookings = bookings.filter(
     (booking) => booking.status === "pending"
+  );
+
+  const acceptedBookings = bookings.filter(
+    (booking) => booking.status === "accepted"
   );
 
   const formatDate = (dateString) => {
@@ -139,7 +167,6 @@ const ExpertHome = () => {
     });
   };
 
-  // ERROR UI
   if (error) {
     return (
       <div className="expert-home">
@@ -166,7 +193,6 @@ const ExpertHome = () => {
     );
   }
 
-  // LOADING UI
   if (loading) {
     return (
       <div className="expert-home">
@@ -177,15 +203,50 @@ const ExpertHome = () => {
     );
   }
 
-  // MAIN UI
   return (
     <div className="expert-home">
+      {notification && (
+        <div 
+          className={`notification-banner ${notification.type}`}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '16px 24px',
+            borderRadius: '12px',
+            background: notification.type === 'success' ? '#10b981' : notification.type === 'error' ? '#ef4444' : '#3b82f6',
+            color: 'white',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            animation: 'slideIn 0.3s ease-out'
+          }}
+        >
+          <Bell size={20} />
+          <span>{notification.message}</span>
+        </div>
+      )}
+
       <div className="profile-card">
         <div className="profile-header">
           <h2>Expert Dashboard</h2>
-          <button className="logout-btn-expert" onClick={logout} title="Logout">
-            <LogOut size={18} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span 
+              style={{ 
+                width: '10px', 
+                height: '10px', 
+                borderRadius: '50%', 
+                background: connected ? '#10b981' : '#ef4444',
+                display: 'inline-block'
+              }}
+              title={connected ? 'Connected' : 'Disconnected'}
+            />
+            <button className="logout-btn-expert" onClick={logout} title="Logout">
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="profile-details">
@@ -257,11 +318,59 @@ const ExpertHome = () => {
           )}
         </div>
 
-        {/* Show all bookings history */}
-        {bookings.filter(b => b.status !== 'pending').length > 0 && (
+        {acceptedBookings.length > 0 && (
+          <div className="booking-card">
+            <h4>
+              <MessageCircle size={22} /> Accepted Clients
+              <span className="badge">{acceptedBookings.length}</span>
+            </h4>
+
+            {acceptedBookings.map((booking) => (
+              <div key={booking._id} className="booking-item accepted-booking">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p>
+                      <strong>Client:</strong> {booking.clientName}
+                    </p>
+                    <p>
+                      <strong>Phone:</strong> {booking.clientPhone}
+                    </p>
+                    <p style={{ fontSize: '14px', color: '#64748b' }}>
+                      <Calendar size={14} style={{ display: 'inline', marginRight: '6px' }} />
+                      Accepted {formatDate(booking.updatedAt || booking.createdAt)}
+                    </p>
+                  </div>
+                  
+                  <button
+                    className="chat-btn-expert"
+                    onClick={() => handleOpenChat(booking.clientId._id || booking.clientId)}
+                    style={{
+                      padding: '10px 20px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontWeight: '600',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <MessageCircle size={18} />
+                    Chat
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {bookings.filter(b => b.status === 'declined').length > 0 && (
           <div className="booking-history">
-            <h4>Booking History</h4>
-            {bookings.filter(b => b.status !== 'pending').map((booking) => (
+            <h4>Declined Bookings</h4>
+            {bookings.filter(b => b.status === 'declined').map((booking) => (
               <div key={booking._id} className="history-item">
                 <div className="history-header">
                   <span><strong>{booking.clientName}</strong></span>

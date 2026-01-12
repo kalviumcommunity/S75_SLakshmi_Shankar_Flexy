@@ -73,7 +73,7 @@ const ExpertLogin = () => {
         })
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
       if (data.success) {
         tokenManager.setToken(data.token);
