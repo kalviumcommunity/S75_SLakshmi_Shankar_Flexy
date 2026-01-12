@@ -703,8 +703,8 @@
 }
 
 .logout-btn {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: transparent;
+  border: 1.5px solid #ff6b35;
   border-radius: 8px;
   padding: 10px;
   cursor: pointer;
@@ -712,23 +712,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #e0e0e0;
+  color: #ff6b35;
 }
 
 .logout-btn:hover {
-  background: #252525;
-  border-color: #444;
+  background: #ff6b35;
+  color: #1a2332;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
 }
 
 .logout-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
 }
 
 .logout-btn:focus {
   outline: none;
-  border-color: #555;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
 }
