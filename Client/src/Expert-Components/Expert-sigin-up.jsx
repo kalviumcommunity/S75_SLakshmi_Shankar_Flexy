@@ -110,7 +110,7 @@ const ExpertSignUp = () => {
             password: formData.password,
           };
 
-          const response = await fetch(
+          const result = await fetch(
             'https://flexy-backend.onrender.com/api/expert-sign-up',
             {
               method: 'POST',

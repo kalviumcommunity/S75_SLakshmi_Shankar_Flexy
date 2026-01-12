@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, User } from "lucide-react";
 import { useSocket } from "../utils/SocketContext";
 import "../styles/Chat.css";
 
-const Chat = () => {
-  const { expertId } = useParams();
+const ExpertChat = () => {
+  const { clientId } = useParams();
   const navigate = useNavigate();
-  const clientPhone = localStorage.getItem("clientPhone") || "Guest";
-  const clientId = localStorage.getItem("clientId");
+  const expertContact = localStorage.getItem("expertContact");
+  const expertId = localStorage.getItem("expertId");
   const messagesEndRef = useRef(null);
 
   const { socket, connected } = useSocket();
@@ -33,7 +33,7 @@ const Chat = () => {
     if (!socket || !connected) return;
 
     socket.emit("join-room", roomId);
-    console.log(`💬 Client joined chat room: ${roomId}`);
+    console.log(`💬 Expert joined chat room: ${roomId}`);
 
     const handleReceiveMessage = (data) => {
       console.log("Message received:", data);
@@ -41,13 +41,13 @@ const Chat = () => {
     };
 
     const handleUserTyping = ({ sender }) => {
-      if (sender !== clientPhone) {
+      if (sender !== expertContact) {
         setIsTyping(true);
       }
     };
 
     const handleUserStopTyping = ({ sender }) => {
-      if (sender !== clientPhone) {
+      if (sender !== expertContact) {
         setIsTyping(false);
       }
     };
@@ -61,7 +61,7 @@ const Chat = () => {
       socket.off("user-typing", handleUserTyping);
       socket.off("user-stop-typing", handleUserStopTyping);
     };
-  }, [socket, connected, roomId, clientPhone]);
+  }, [socket, connected, roomId, expertContact]);
 
   const sendMessage = () => {
     if (!message.trim() || !connected) return;
@@ -69,11 +69,11 @@ const Chat = () => {
     const messageData = {
       roomId,
       message: message.trim(),
-      sender: clientPhone
+      sender: expertContact
     };
 
     socket.emit("send-message", messageData);
-    socket.emit("stop-typing", { roomId, sender: clientPhone });
+    socket.emit("stop-typing", { roomId, sender: expertContact });
     setMessage("");
   };
 
@@ -90,9 +90,9 @@ const Chat = () => {
     if (!connected) return;
     
     if (e.target.value.trim()) {
-      socket.emit("typing", { roomId, sender: clientPhone });
+      socket.emit("typing", { roomId, sender: expertContact });
     } else {
-      socket.emit("stop-typing", { roomId, sender: clientPhone });
+      socket.emit("stop-typing", { roomId, sender: expertContact });
     }
   };
 
@@ -103,7 +103,10 @@ const Chat = () => {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h3>Expert Chat</h3>
+          <h3>
+            <User size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+            Chat with Client
+          </h3>
           {connected ? (
             <span className="status-online">● Online</span>
           ) : (
@@ -121,10 +124,12 @@ const Chat = () => {
           messages.map((msg, idx) => (
             <div
               key={idx}
-              className={msg.sender === clientPhone ? "message-container my-message-container" : "message-container their-message-container"}
+              className={msg.sender === expertContact ? "message-container my-message-container" : "message-container their-message-container"}
             >
-              <div className={msg.sender === clientPhone ? "my-message" : "their-message"}>
-                <div className="message-sender">{msg.sender === clientPhone ? "You" : "Expert"}</div>
+              <div className={msg.sender === expertContact ? "my-message" : "their-message"}>
+                <div className="message-sender">
+                  {msg.sender === expertContact ? "You" : "Client"}
+                </div>
                 <div className="message-text">{msg.message}</div>
                 <div className="message-time">
                   {new Date(msg.time).toLocaleTimeString('en-US', {
@@ -164,4 +169,4 @@ const Chat = () => {
   );
 };
 
-export default Chat;
+export default ExpertChat;
