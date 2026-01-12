@@ -7,7 +7,8 @@ const expertSchema = new mongoose.Schema({
     },
     contact: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     profession: {
         type: String,
