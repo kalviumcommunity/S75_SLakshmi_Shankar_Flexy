@@ -41,10 +41,10 @@ router.post("/expert-sign-up", async (req, res) => {
     }
 
     // Check existing expert
-    const existing = await Expert.findOne({ contact });
-    if (existing) {
-      return res.status(409).json({ message: "Expert already exists", success: false });
-    }
+    // const existing = await Expert.findOne({ contact });
+    // if (existing) {
+    //   return res.status(409).json({ message: "Expert already exists", success: false });
+    // }
 
     // Create expert
     const hashedPassword = await bcrypt.hash(password, 12);
