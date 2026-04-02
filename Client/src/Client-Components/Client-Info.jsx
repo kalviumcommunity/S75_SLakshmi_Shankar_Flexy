@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { X, MapPin, Phone, Briefcase, Calendar, AlertCircle } from 'lucide-react';
+import { X, MapPin, Phone, Briefcase, Calendar, AlertCircle, Star, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import Profile from "../assests/profile.png";
 import { authenticatedFetch } from '../utils/auth';
+import '../styles/ExpertInfoPage.css';
 
 const ExpertInfoPage = () => {
     const { id } = useParams();
@@ -20,15 +21,11 @@ const ExpertInfoPage = () => {
         try {
             setLoading(true);
             setError(null);
-
-            // Use the correct endpoint: GET /api/expert/:id
             const response = await authenticatedFetch(
                 `https://flexy-backend.onrender.com/api/expert/${id}`,
                 { method: 'GET' }
             );
-
             const data = await response.json();
-            
             if (data.success) {
                 setInfo(data.expert);
                 fetchPexelsImages(data.expert.profession);
@@ -46,21 +43,15 @@ const ExpertInfoPage = () => {
     const fetchPexelsImages = async (query) => {
         try {
             const res = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=5`, {
-                headers: {
-                    Authorization: 'aYFzBVJfq5rovLfaU2BbXNgLJKL2AJl6axB01RzN2Qdv5TUHPGr1FfzR'
-                }
+                headers: { Authorization: 'aYFzBVJfq5rovLfaU2BbXNgLJKL2AJl6axB01RzN2Qdv5TUHPGr1FfzR' }
             });
             const data = await res.json();
-            if (data.photos && data.photos.length > 0) {
-                setPexelsImages(data.photos);
-            }
+            if (data.photos && data.photos.length > 0) setPexelsImages(data.photos);
         } catch (error) {
             console.error("Failed to fetch images:", error);
-            // Non-critical error, continue without images
         }
     };
 
-    // Auto carousel
     useEffect(() => {
         if (pexelsImages.length === 0) return;
         const interval = setInterval(() => {
@@ -69,46 +60,25 @@ const ExpertInfoPage = () => {
         return () => clearInterval(interval);
     }, [pexelsImages]);
 
-    useEffect(() => {
-        fetchInfo();
-    }, [id]);
+    useEffect(() => { fetchInfo(); }, [id]);
 
-    const handleHireClick = () => {
-        setShowHireModal(true);
-    };
+    const handleHireClick = () => setShowHireModal(true);
 
     const handleHireSubmit = async () => {
         if (isHiring) return;
-
-        if (!hireMessage.trim()) {
-            alert('Please enter a message describing your requirements.');
-            return;
-        }
-        
+        if (!hireMessage.trim()) { alert('Please enter a message describing your requirements.'); return; }
         setIsHiring(true);
         try {
             const response = await authenticatedFetch(
                 'https://flexy-backend.onrender.com/api/create-booking',
-                {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        expertId: id,
-                        message: hireMessage
-                    })
-                }
+                { method: 'POST', body: JSON.stringify({ expertId: id, message: hireMessage }) }
             );
-
             const data = await response.json();
-            
             if (data.success) {
                 alert(`Booking request sent successfully! ${info.name} will review your request and get back to you.`);
                 setShowHireModal(false);
                 setHireMessage('');
-                
-                // Trigger custom event to notify expert dashboard
-                window.dispatchEvent(new CustomEvent('bookingCreated', { 
-                    detail: { expertId: id, booking: data.booking } 
-                }));
+                window.dispatchEvent(new CustomEvent('bookingCreated', { detail: { expertId: id, booking: data.booking } }));
             } else {
                 alert(data.message || 'Failed to send booking request. Please try again.');
             }
@@ -120,35 +90,25 @@ const ExpertInfoPage = () => {
         }
     };
 
-    const closeHireModal = () => {
-        setShowHireModal(false);
-        setHireMessage('');
-    };
+    const closeHireModal = () => { setShowHireModal(false); setHireMessage(''); };
+    const handleClose = () => navigate(-1);
 
-    const handleClose = () => {
-        navigate(-1); // Go back to previous page
-    };
-
-    // Star rating display
-    const StarRating = ({ rating = 4 }) => {
-        return (
-            <span style={{ color: '#fbbf24', fontSize: '18px', letterSpacing: '2px' }}>
-                {Array.from({ length: 5 }, (_, i) => (
-                    <span key={i} style={{ color: i < rating ? '#fbbf24' : '#e5e7eb' }}>
-                        ★
-                    </span>
-                ))}
-            </span>
-        );
-    };
+    const StarRating = ({ rating = 4 }) => (
+        <span className="eip-stars">
+            {Array.from({ length: 5 }, (_, i) => (
+                <span key={i} style={{ color: i < rating ? '#f97316' : '#1e293b' }}>★</span>
+            ))}
+        </span>
+    );
 
     if (loading) {
         return (
-            <div className='mainInfo'>
-                <div className='infoBox'>
-                    <p style={{ textAlign: 'center', padding: '60px 0', fontSize: '18px', color: '#64748b' }}>
-                        Loading expert information...
-                    </p>
+            <div className="eip-page">
+                <div className="eip-bg-orb eip-orb-1" />
+                <div className="eip-bg-orb eip-orb-2" />
+                <div className="eip-loader-wrap">
+                    <div className="eip-spinner" />
+                    <p>Loading expert profile…</p>
                 </div>
             </div>
         );
@@ -156,119 +116,146 @@ const ExpertInfoPage = () => {
 
     if (error) {
         return (
-            <div className='mainInfo'>
-                <div className='infoBox'>
-                    <X size={20} className="closeBtn" onClick={handleClose} />
-                    <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                        <AlertCircle size={48} color="#dc2626" style={{ margin: '0 auto 20px' }} />
-                        <p style={{ fontSize: '20px', color: '#dc2626', fontWeight: '600', marginBottom: '12px' }}>
-                            {error}
-                        </p>
-                        <button 
-                            onClick={handleClose}
-                            style={{
-                                marginTop: '24px',
-                                padding: '12px 32px',
-                                background: '#f97316',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '10px',
-                                cursor: 'pointer',
-                                fontWeight: '600'
-                            }}
-                        >
-                            Go Back
-                        </button>
-                    </div>
+            <div className="eip-page">
+                <div className="eip-bg-orb eip-orb-1" />
+                <div className="eip-bg-orb eip-orb-2" />
+                <div className="eip-error-wrap">
+                    <AlertCircle size={48} className="eip-error-icon" />
+                    <p className="eip-error-msg">{error}</p>
+                    <button className="eip-back-btn" onClick={handleClose}>
+                        <ArrowLeft size={16} /> Go Back
+                    </button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className='mainInfo'>
-            <div className='infoBox'>
-                <X size={20} className="closeBtn" onClick={handleClose} />
-                
+        <div className="eip-page">
+            {/* Ambient orbs */}
+            <div className="eip-bg-orb eip-orb-1" />
+            <div className="eip-bg-orb eip-orb-2" />
+
+            {/* Back button */}
+            <button className="eip-nav-back" onClick={handleClose}>
+                <ArrowLeft size={16} /> Back
+            </button>
+
+            <div className="eip-card">
+                {/* Close button */}
+                <button className="eip-close-btn" onClick={handleClose} aria-label="Close">
+                    <X size={18} />
+                </button>
+
                 {info && (
                     <>
-                        {/* Profile Image */}
-                        <img src={Profile} alt="Profile Picture" />
-                        
-                        {/* Info Lines with Icons */}
-                        <p className='line'>
-                            <strong>Name:</strong> {info.name}
-                        </p>
-                        
-                        <p className='line'>
-                            <strong>Profession:</strong> {info.profession}
-                        </p>
-                        
-                        <p className='line'>
-                            <strong>Rating:</strong> <StarRating rating={info.rating || 4} />
-                        </p>
-                        
-                        <p className='line'>
-                            <strong>Location:</strong> {info.location}
-                        </p>
-                        
-                        <p className='line'>
-                            <strong>Experience:</strong> {info.exp} Year{info.exp !== 1 ? 's' : ''}
-                        </p>
-                        
-                        <p className='line'>
-                            <strong>Phone:</strong> {info.contact}
-                        </p>
+                        {/* Profile header */}
+                        <div className="eip-profile-header">
+                            <div className="eip-avatar-wrap">
+                                <img src={Profile} alt="Profile" className="eip-avatar" />
+                                <div className="eip-avatar-ring" />
+                            </div>
+                            <div className="eip-profile-meta">
+                                <h1 className="eip-name">{info.name}</h1>
+                                <span className="eip-profession-tag">{info.profession}</span>
+                                <div className="eip-rating-row">
+                                    <StarRating rating={info.rating || 4} />
+                                    <span className="eip-rating-num">{info.rating || 4}.0</span>
+                                </div>
+                            </div>
+                        </div>
 
-                        {/* Hire Button */}
-                        <button className='hireButton' onClick={handleHireClick}>
+                        <div className="eip-divider" />
+
+                        {/* Info grid */}
+                        <div className="eip-info-grid">
+                            <div className="eip-info-item">
+                                <div className="eip-info-icon"><MapPin size={16} /></div>
+                                <div>
+                                    <span className="eip-info-label">Location</span>
+                                    <span className="eip-info-value">{info.location}</span>
+                                </div>
+                            </div>
+                            <div className="eip-info-item">
+                                <div className="eip-info-icon"><Calendar size={16} /></div>
+                                <div>
+                                    <span className="eip-info-label">Experience</span>
+                                    <span className="eip-info-value">{info.exp} Year{info.exp !== 1 ? 's' : ''}</span>
+                                </div>
+                            </div>
+                            <div className="eip-info-item">
+                                <div className="eip-info-icon"><Phone size={16} /></div>
+                                <div>
+                                    <span className="eip-info-label">Phone</span>
+                                    <span className="eip-info-value">{info.contact}</span>
+                                </div>
+                            </div>
+                            <div className="eip-info-item">
+                                <div className="eip-info-icon"><Briefcase size={16} /></div>
+                                <div>
+                                    <span className="eip-info-label">Profession</span>
+                                    <span className="eip-info-value">{info.profession}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hire button */}
+                        <button className="eip-hire-btn" onClick={handleHireClick}>
                             Hire Now
                         </button>
 
-                        {/* Portfolio Images */}
+                        {/* Portfolio gallery */}
                         {pexelsImages.length > 0 && (
                             <>
-                                <hr />
-                                <h3 style={{ 
-                                    textAlign: 'center', 
-                                    color: '#0f172a', 
-                                    marginBottom: '24px',
-                                    fontSize: '20px',
-                                    fontWeight: '700'
-                                }}>
-                                    Portfolio Gallery
-                                </h3>
-                                <div className="carousel">
+                                <div className="eip-divider" />
+                                <h3 className="eip-gallery-title">Portfolio Gallery</h3>
+                                <div className="eip-carousel">
                                     {pexelsImages.length > 2 && (
-                                        <img 
-                                            src={pexelsImages[(currentIndex - 1 + pexelsImages.length) % pexelsImages.length].src.medium} 
-                                            alt="previous work" 
-                                            className="side-image"
+                                        <img
+                                            src={pexelsImages[(currentIndex - 1 + pexelsImages.length) % pexelsImages.length].src.medium}
+                                            alt="previous work"
+                                            className="eip-img-side"
                                             onClick={() => setCurrentIndex((currentIndex - 1 + pexelsImages.length) % pexelsImages.length)}
                                         />
                                     )}
-                                    <img 
-                                        src={pexelsImages[currentIndex].src.medium} 
-                                        alt="current work" 
-                                        className="main-image"
-                                    />
+                                    <div className="eip-img-main-wrap">
+                                        <img
+                                            src={pexelsImages[currentIndex].src.medium}
+                                            alt="current work"
+                                            className="eip-img-main"
+                                        />
+                                        <div className="eip-carousel-nav">
+                                            <button
+                                                className="eip-nav-btn"
+                                                onClick={() => setCurrentIndex((currentIndex - 1 + pexelsImages.length) % pexelsImages.length)}
+                                            ><ChevronLeft size={18} /></button>
+                                            <span className="eip-carousel-count">{currentIndex + 1} / {pexelsImages.length}</span>
+                                            <button
+                                                className="eip-nav-btn"
+                                                onClick={() => setCurrentIndex((currentIndex + 1) % pexelsImages.length)}
+                                            ><ChevronRight size={18} /></button>
+                                        </div>
+                                    </div>
                                     {pexelsImages.length > 2 && (
-                                        <img 
-                                            src={pexelsImages[(currentIndex + 1) % pexelsImages.length].src.medium} 
-                                            alt="next work" 
-                                            className="side-image"
+                                        <img
+                                            src={pexelsImages[(currentIndex + 1) % pexelsImages.length].src.medium}
+                                            alt="next work"
+                                            className="eip-img-side"
                                             onClick={() => setCurrentIndex((currentIndex + 1) % pexelsImages.length)}
                                         />
                                     )}
                                 </div>
-                                <p style={{ 
-                                    textAlign: 'center', 
-                                    color: '#94a3b8', 
-                                    fontSize: '14px',
-                                    marginTop: '16px'
-                                }}>
-                                    {currentIndex + 1} of {pexelsImages.length}
-                                </p>
+
+                                {/* Dot indicators */}
+                                <div className="eip-dots">
+                                    {pexelsImages.map((_, i) => (
+                                        <button
+                                            key={i}
+                                            className={`eip-dot ${i === currentIndex ? 'eip-dot-active' : ''}`}
+                                            onClick={() => setCurrentIndex(i)}
+                                        />
+                                    ))}
+                                </div>
                             </>
                         )}
                     </>
@@ -277,32 +264,37 @@ const ExpertInfoPage = () => {
 
             {/* Hire Modal */}
             {showHireModal && (
-                <div className="modal-overlay" onClick={closeHireModal}>
-                    <div className="hire-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3>Hire {info?.name}</h3>
-                            <X size={24} onClick={closeHireModal} style={{ cursor: 'pointer' }} />
+                <div className="eip-modal-overlay" onClick={closeHireModal}>
+                    <div className="eip-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="eip-modal-header">
+                            <div>
+                                <p className="eip-modal-label">Send request to</p>
+                                <h3 className="eip-modal-title">{info?.name}</h3>
+                            </div>
+                            <button className="eip-modal-close" onClick={closeHireModal}>
+                                <X size={18} />
+                            </button>
                         </div>
-                        <div className="modal-body">
-                            <p>
-                                Send a detailed message to <strong>{info?.name}</strong> about your project requirements:
+                        <div className="eip-modal-body">
+                            <p className="eip-modal-desc">
+                                Describe your project so <strong>{info?.name}</strong> can review your requirements and get back to you.
                             </p>
                             <textarea
                                 value={hireMessage}
                                 onChange={(e) => setHireMessage(e.target.value)}
                                 placeholder="Example: I need a plumber to fix a leaking pipe in my kitchen. The job should be done within 2 days. Please let me know your availability and rates."
-                                rows={6}
+                                rows={5}
+                                className="eip-modal-textarea"
                             />
                         </div>
-                        <div className="modal-footer">
-                            <button onClick={closeHireModal}>
-                                Cancel
-                            </button>
-                            <button 
+                        <div className="eip-modal-footer">
+                            <button className="eip-modal-cancel" onClick={closeHireModal}>Cancel</button>
+                            <button
+                                className="eip-modal-submit"
                                 onClick={handleHireSubmit}
                                 disabled={isHiring || !hireMessage.trim()}
                             >
-                                {isHiring ? 'Sending Request...' : 'Send Booking Request'}
+                                {isHiring ? 'Sending…' : 'Send Booking Request'}
                             </button>
                         </div>
                     </div>
